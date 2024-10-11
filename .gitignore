@@ -1,0 +1,42 @@
+# Geral
+node_modules/
+dist/
+.DS_Store
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Sistema Operacional
+Thumbs.db
+*.DS_Store
+
+# IDEs/Editor de Texto
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Diretório frontend
+/frontend/node_modules/
+/frontend/.env
+/frontend/.next
+/frontend/build
+/frontend/out
+/frontend/.vercel
+
+# Diretório backend
+/backend/node_modules/
+/backend/.env
+/backend/.next
+/backend/build
+/backend/out
+/backend/.vercel
+
+# Se você tiver arquivos do banco de dados
+*.sqlite
+*.sqlite3
