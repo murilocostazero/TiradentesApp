@@ -31,7 +31,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 });
 
 // Adicionar uma nova escola
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/:id', authenticateToken, async (req, res) => {
     const { name, address, phoneNumber, team } = req.body;
 
     if (!name || !address || !phoneNumber) {
@@ -40,15 +40,13 @@ router.post('/', authenticateToken, async (req, res) => {
 
     try {
         // Adicionar o usuário logado automaticamente à equipe de direção
-        const userId = req.user._id; // ID do usuário autenticado
-        // Converte o userId para ObjectId, se necessário
-        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const userId = req.params.id; // ID do usuário
 
         const newSchool = new School({
             name,
             address,
             phoneNumber,
-            team: [userObjectId, ...(Array.isArray(team) ? team : [])], // Garante que equipeDirecao seja um array
+            team: [userId, ...(Array.isArray(team) ? team : [])], // Garante que equipeDirecao seja um array
         });
 
         await newSchool.save();
@@ -84,7 +82,10 @@ router.put('/:id', authenticateToken, async (req, res) => {
 // Buscar todas as escolas em que o usuário está na equipe de direção
 router.get('/team/:userId', authenticateToken, async (req, res) => {
     try {
-        const schools = await School.find({ team: req.params.userId });
+        // Converte o userId para ObjectId
+        const userId = new mongoose.Types.ObjectId(req.params.userId);
+
+        const schools = await School.find({ team: userId });
         if (schools.length === 0) {
             return res.status(404).json({ message: 'Nenhuma escola encontrada para este usuário' });
         }

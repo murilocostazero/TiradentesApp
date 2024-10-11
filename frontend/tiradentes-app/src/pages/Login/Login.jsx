@@ -29,21 +29,25 @@ const Login = () => {
         setError('');
 
         //Login API call
-        try{
+        try {
             const response = await axiosInstance.post('/login', {
                 email: email,
                 password: password
             });
 
-            if(response.data && response.data.accessToken){
+            if (response.data && response.data.accessToken) {
                 localStorage.setItem('token', response.data.accessToken);
                 navigate('/dashboard');
-            } else if(response.data && response.data.error){
+            } else if (response.data && response.data.error) {
                 setError(response.data.message);
             }
-        } catch(error){
+        } catch (error) {
             console.log(error)
-            setError('Um erro inesperado aconteceu. Tente novamente.');
+            if (error.response.data.message) {
+                setError(error.response.data.message)
+            } else {
+                setError('Um erro inesperado aconteceu. Tente novamente.');
+            }
         }
     }
 

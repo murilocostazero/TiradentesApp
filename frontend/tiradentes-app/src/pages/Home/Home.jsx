@@ -80,7 +80,7 @@ const Home = () => {
         {/* Área Central */}
         <div className="flex-grow p-6 bg-white">
           {/* Conteúdo baseado na opção selecionada */}
-          {selectedOption === 'School' && <School />}
+          {selectedOption === 'School' && userInfo ? <School userInfo={userInfo} /> : <p>Carregando...</p>}
           {selectedOption === 'Classes' && <p>Informações sobre as Turmas...</p>}
           {selectedOption === 'Incident' && <p>Informações sobre Ocorrências...</p>}
           {/* Adicione o conteúdo para as outras opções aqui */}
