@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaSave, FaCheck } from 'react-icons/fa';
 import axiosInstance from '../../utils/axiosIntance';
+import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import './School.css';
 
-const School = ({ userInfo }) => {
+const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => {
   const [schools, setSchools] = useState([]);
-  const [selectedSchool, setSelectedSchool] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [newSchoolName, setNewSchoolName] = useState('');
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
@@ -61,11 +61,6 @@ const School = ({ userInfo }) => {
       clearFields();
       setShowModal(false); // Fecha a modal após adicionar
     }
-  };
-
-  // Função para selecionar uma escola
-  const selectSchool = (school) => {
-    setSelectedSchool(school);
   };
 
   const handleDelete = (schoolId) => {
@@ -213,30 +208,33 @@ const School = ({ userInfo }) => {
         {schools.map((school, index) => (
           <div
             key={index}
-            className={`p-4 border rounded mb-2 flex justify-between items-center ${selectedSchool === school ? 'bg-blue-100' : 'bg-white'
+            className={`p-4 border rounded mb-2 flex justify-between items-center ${userInfo.lastSelectedSchool === school._id ? 'bg-blue-100' : 'bg-white'
               }`}
           >
             <span>{school.name}</span>
             <div className="flex items-center">
               {
-                !deletingSchool ?
-                  <>
-                    <button
-                      onClick={() => selectSchool(school)}
-                      className={`mr-2 p-2 ${selectedSchool === school ? 'bg-green-500' : 'bg-gray-200'
-                        } text-white rounded`}
-                    >
-                      Selecionar
-                    </button>
-                    <button
-                      onClick={() => editSchool(school)}
-                      className="mr-2 p-2 bg-yellow-500 text-white rounded"
-                    >
-                      <FaEdit />
-                    </button>
-                  </>
+                loading ?
+                  <LoadingSpinner />
                   :
-                  <div />
+                  !deletingSchool ?
+                    <>
+                      <button
+                        onClick={() => handleSelectedSchool(school)}
+                        className={`mr-2 p-2 ${userInfo.lastSelectedSchool === school._id ? 'bg-green-500' : 'bg-gray-200'
+                          } text-white rounded`}
+                      >
+                        Selecionar
+                      </button>
+                      <button
+                        onClick={() => editSchool(school)}
+                        className="mr-2 p-2 bg-yellow-500 text-white rounded"
+                      >
+                        <FaEdit />
+                      </button>
+                    </>
+                    :
+                    <div />
               }
 
               {deletingSchool === school._id ? (

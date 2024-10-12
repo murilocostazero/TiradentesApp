@@ -6,7 +6,11 @@ const userSchema = new Schema({
     rank: { type: String },
     email: { type: String },
     password: { type: String },
-    createdOn: { type: Date, default: new Date().getTime() }
+    createdOn: { type: Date, default: new Date().getTime() },
+    lastSelectedSchool: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'School'
+    }
 });
 
 module.exports = mongoose.model('User', userSchema);

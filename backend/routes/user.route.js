@@ -55,6 +55,26 @@ router.post('/create-account', async (req, res) => {
     });
 });
 
+router.put('/lastSelectedSchool/:id', async (req, res) => {
+    const { lastSelectedSchool } = req.body;
+
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { lastSelectedSchool: lastSelectedSchool },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado' });
+        }
+
+        res.json({ message: 'Usuário atualizado com sucesso', user });
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao atualizar usuário', error });
+    }
+});
+
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
