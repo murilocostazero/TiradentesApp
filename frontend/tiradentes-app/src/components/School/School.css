@@ -1,0 +1,47 @@
+.school-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    justify-content: space-between;
+}
+
+.delete-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px;
+}
+
+.circle {
+    width: 20px;
+    height: 20px;
+    border: 3px solid lightgray;
+    border-top: 3px solid orange;
+    border-radius: 50%;
+    animation: spin 5s linear infinite;
+    /* margin-right: 4px; */
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.btn {
+    border: none;
+    cursor: pointer;
+}
+
+.btn-warning {
+    background-color: transparent;
+    color: white;
+}
+
+.btn-danger {
+    background-color: red;
+    color: white;
+}
