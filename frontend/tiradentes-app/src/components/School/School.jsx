@@ -9,16 +9,19 @@ const School = ({ userInfo }) => {
   const [newSchoolName, setNewSchoolName] = useState('');
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
   const [newAddress, setNewAddress] = useState('');
-  const [editingSchool, setEditingSchool] = useState(null);
-  const [editName, setEditName] = useState('');
+
+  const [editingSchool, setEditingSchool] = useState(false);
+  const [schoolToEdit, setSchoolToEdit] = useState(null);
+
+
   const [errorLabel, setErrorLabel] = useState('');
 
   const getSchools = async () => {
     try {
       const response = await axiosInstance.get(`/school/team/${userInfo._id}`);
-      if(response.data){
+      if (response.data) {
         setSchools(response.data);
-      } 
+      }
     } catch (error) {
       console.log(error);
     }
@@ -62,24 +65,46 @@ const School = ({ userInfo }) => {
     setSelectedSchool(school);
   };
 
-  // Função para iniciar edição da escola
-  const editSchool = (school) => {
-    setEditingSchool(school);
-    setEditName(school.name); // Preenche o campo de edição com o nome da escola atual
-  };
-
-  // Função para salvar a edição da escola
-  const saveSchool = (school) => {
-    setSchools(
-      schools.map((s) => (s === school ? { ...s, name: editName } : s))
-    );
-    setEditingSchool(null);
-  };
-
   // Função para remover uma escola
   const removeSchool = (school) => {
     setSchools(schools.filter((s) => s !== school));
   };
+
+  const editSchool = (school) => {
+    setEditingSchool(true);
+    setShowModal(true);
+    setNewSchoolName(school.name);
+    setNewAddress(school.address);
+    setNewPhoneNumber(school.phoneNumber);
+    setSchoolToEdit(school);
+  }
+
+  const saveSchoolModifications = async () => {
+    if (!newSchoolName || !newAddress || !newPhoneNumber) {
+      setError('Todos os campos são obrigatórios.');
+    } else {
+      //API call
+      try {
+        const response = await axiosInstance.put(`/school/${schoolToEdit._id}`, {
+          name: newSchoolName,
+          address: newAddress,
+          phoneNumber: newPhoneNumber
+        });
+
+        if (response.status === 400 || response.status === 500) {
+          setError(response.data.message)
+        } else {
+          setEditingSchool(false);
+          setShowModal(false);
+          getSchools();
+          clearFields();
+        }
+      } catch (error) {
+        console.log(error)
+        setError('Um erro inesperado aconteceu. Tente novamente.');
+      }
+    }
+  }
 
   const clearFields = () => {
     setNewSchoolName('');
@@ -102,7 +127,7 @@ const School = ({ userInfo }) => {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded shadow-lg w-1/3">
-            <h2 className="text-lg font-semibold mb-4">Adicionar Nova Escola</h2>
+            <h2 className="text-lg font-semibold mb-4">{editingSchool ? 'Alterar escola' : 'Adicionar Nova Escola'}</h2>
 
             <input
               type="text"
@@ -141,10 +166,10 @@ const School = ({ userInfo }) => {
                 Cancelar
               </button>
               <button
-                onClick={addSchool}
+                onClick={editingSchool ? saveSchoolModifications : addSchool}
                 className="px-4 py-2 bg-primary text-white rounded"
               >
-                Adicionar
+                {editingSchool ? 'Salvar alterações' : 'Adicionar'}
               </button>
             </div>
           </div>
@@ -159,15 +184,7 @@ const School = ({ userInfo }) => {
             className={`p-4 border rounded mb-2 flex justify-between items-center ${selectedSchool === school ? 'bg-blue-100' : 'bg-white'
               }`}
           >
-            {editingSchool === school ? (
-              <input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="border p-2"
-              />
-            ) : (
-              <span>{school.name}</span>
-            )}
+            <span>{school.name}</span>
             <div className="flex items-center">
               <button
                 onClick={() => selectSchool(school)}
@@ -176,21 +193,12 @@ const School = ({ userInfo }) => {
               >
                 <FaCheck />
               </button>
-              {editingSchool === school ? (
-                <button
-                  onClick={() => saveSchool(school)}
-                  className="mr-2 p-2 bg-blue-500 text-white rounded"
-                >
-                  <FaSave />
-                </button>
-              ) : (
-                <button
-                  onClick={() => editSchool(school)}
-                  className="mr-2 p-2 bg-yellow-500 text-white rounded"
-                >
-                  <FaEdit />
-                </button>
-              )}
+              <button
+                onClick={() => editSchool(school)}
+                className="mr-2 p-2 bg-yellow-500 text-white rounded"
+              >
+                <FaEdit />
+              </button>
               <button
                 onClick={() => removeSchool(school)}
                 className="p-2 bg-red-500 text-white rounded"
