@@ -9,13 +9,13 @@ const Classrooms = ({ userInfo }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
 
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [classroomToRemove, setClassRoomToRemove] = useState('');
+
     const [grade, setGrade] = useState(0);
     const [className, setClassName] = useState('');
     const [shift, setShift] = useState('vespertino');
 
-    const [tempDeletedClassroom, setTempDeletedClassroom] = useState(null);
-    const [isUndoVisible, setIsUndoVisible] = useState(false);
-    const [timeoutId, setTimeoutId] = useState(null);
     const [statusBar, setStatusBar] = useState({
         message: '',
         type: '',
@@ -107,25 +107,22 @@ const Classrooms = ({ userInfo }) => {
         }
     };
 
-    const handleDeleteClassroom = (id) => {
-        const classroomToDelete = classrooms.find(cls => cls.id === id);
-        setTempDeletedClassroom(classroomToDelete);
-        setClassrooms(classrooms.filter(cls => cls.id !== id));
-        setIsUndoVisible(true);
-        const timeout = setTimeout(() => {
-            // Aqui você deleta permanentemente a turma da API
-            // fetch(`/api/classrooms/${id}`, { method: 'DELETE' });
-            setTempDeletedClassroom(null);
-            setIsUndoVisible(false);
-        }, 5000);
-        setTimeoutId(timeout);
-    };
+    const handleDeleteClassroom = async () => {
+        //API call
+        try {
+            const response = await axiosInstance.delete(`/classroom/${classroomToRemove}`);
 
-    const handleUndoDelete = () => {
-        setClassrooms([...classrooms, tempDeletedClassroom]);
-        setTempDeletedClassroom(null);
-        setIsUndoVisible(false);
-        clearTimeout(timeoutId);
+            if (response.status >= 400 && response.status <= 500) {
+                showStatusBar(response.data.message, 'error');
+            } else {
+                setClassRoomToRemove('');
+                setIsAlertOpen(false);
+                getClassrooms();
+            }
+        } catch (error) {
+            console.log(error)
+            showStatusBar('Um erro inesperado aconteceu. Tente novamente.', 'error');
+        }
     };
 
     const handleEditClassroom = (classroom) => {
@@ -133,6 +130,15 @@ const Classrooms = ({ userInfo }) => {
         setIsEditing(true);
         openModal();
     };
+
+    const handleOpenAlert = (classroom) => {
+        if (classroom.totalStudents > 0) {
+            showStatusBar('Não é possível excluir uma turma que tenha alunos', 'error');
+        } else {
+            setClassRoomToRemove(classroom._id);
+            setIsAlertOpen(true);
+        }
+    }
 
     return (
         <div>
@@ -148,7 +154,7 @@ const Classrooms = ({ userInfo }) => {
                                 <button onClick={() => handleEditClassroom(classroom)} className="edit-btn">
                                     <FaEdit />
                                 </button>
-                                <button onClick={() => handleDeleteClassroom(classroom.id)} className="delete-btn">
+                                <button onClick={() => handleOpenAlert(classroom)} className="delete-btn">
                                     <FaTrash />
                                 </button>
                             </div>
@@ -160,17 +166,6 @@ const Classrooms = ({ userInfo }) => {
                     <FaPlus size={22} />
                 </button>
 
-                {isUndoVisible && (
-                    <div className="undo-container">
-                        <p>Turma removida</p>
-                        <button onClick={handleUndoDelete} className="undo-btn">
-                            <FaUndo /> Desfazer
-                        </button>
-                        <div className="countdown-circle"></div>
-                    </div>
-                )}
-
-                {/* Modal para adicionar nova escola */}
                 {isModalOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                         <div className="bg-white p-6 rounded shadow-lg w-1/3">
@@ -231,6 +226,35 @@ const Classrooms = ({ userInfo }) => {
                                     className="px-4 py-2 bg-primary text-white rounded"
                                 >
                                     {isEditing ? 'Salvar alterações' : 'Adicionar'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal para confirmar exclusão de turma */}
+                {isAlertOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                        <div className="bg-white p-6 rounded shadow-lg w-1/3">
+                            <h2 className="text-lg text-red-600 text-center font-semibold mb-4">CUIDADO</h2>
+
+                            <p className='text-left'>Ao prosseguir, você estará excluindo uma turma definitivamente. Não será possível recuperar ou restaurar os dados dessa turma.</p>
+
+                            <div className="flex justify-end mt-4">
+                                <button
+                                    onClick={() => {
+                                        setClassRoomToRemove('');
+                                        setIsAlertOpen(false);
+                                    }}
+                                    className="mr-2 px-4 py-2 bg-gray-300 rounded"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={handleDeleteClassroom}
+                                    className="px-4 py-2 bg-red-600 text-white rounded"
+                                >
+                                    QUERO EXCLUIR A TURMA
                                 </button>
                             </div>
                         </div>

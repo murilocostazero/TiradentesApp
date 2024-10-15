@@ -80,8 +80,10 @@ router.delete('/:id', authenticateToken, async (req, res) => {
         const deletedClassroom = await Classroom.findByIdAndDelete(req.params.id);
         if (!deletedClassroom) {
             return res.status(404).json({ message: 'Turma não encontrada' });
+        } else if(deletedClassroom.totalStudents > 0){
+            return res.status(400).json({ message: 'Uma turma só pode ser deletada se estiver vazia' });
         }
-        res.json({ message: 'Turma deletada com sucesso' });
+        res.status(200).json({ message: 'Turma deletada com sucesso' });
     } catch (error) {
         res.status(500).json({ message: 'Erro ao deletar a turma', error });
     }
