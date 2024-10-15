@@ -55,12 +55,12 @@ router.post('/', authenticateToken, async (req, res) => {
 
 // Editar os dados de uma turma
 router.put('/:id', authenticateToken, async (req, res) => {
-    const { shift, grade, className, totalStudents } = req.body;
+    const { shift, grade, className } = req.body;
 
     try {
         const updatedClassroom = await Classroom.findByIdAndUpdate(
             req.params.id,
-            { shift, grade, className, totalStudents },
+            { shift, grade, className },
             { new: true }
         );
 

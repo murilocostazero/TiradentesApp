@@ -12,9 +12,10 @@ const Classrooms = ({ userInfo }) => {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const [classroomToRemove, setClassRoomToRemove] = useState('');
 
+    const [classroomId, setClassroomId] = useState('');
     const [grade, setGrade] = useState(0);
     const [className, setClassName] = useState('');
-    const [shift, setShift] = useState('vespertino');
+    const [shift, setShift] = useState('');
 
     const [statusBar, setStatusBar] = useState({
         message: '',
@@ -26,9 +27,6 @@ const Classrooms = ({ userInfo }) => {
         getClassrooms();
     }, []);
 
-    const openModal = () => {
-        setIsModalOpen(true);
-    };
 
     const showStatusBar = (message, type) => {
         setStatusBar({
@@ -56,7 +54,7 @@ const Classrooms = ({ userInfo }) => {
     const getClassrooms = async () => {
         try {
             const response = await axiosInstance.get(`/classroom/school/${userInfo.lastSelectedSchool}`);
-            if (response.status === 404 || response.status === 500) {
+            if (response.status >= 400  && response.status <= 500) {
                 showStatusBar('Nenhuma turma encontrada', 'error');
             } else {
                 setClassrooms(response.data)
@@ -89,18 +87,35 @@ const Classrooms = ({ userInfo }) => {
         closeModal();
     };
 
-    const handleAddOrEditClassroom = async () => {
-        if (isEditing) {
-            // Aqui você edita a turma através da API
-            // fetch(`/api/classrooms/${selectedClassroom.id}`, {method: 'PUT', body: selectedClassroom})
-        } else {
-            // Aqui você cria a turma através da API
-            // fetch('/api/classrooms', {method: 'POST', body: {shift, grade, className, totalStudents}})
+    const editClassroom = async () => {
+        //API call
+        try {
+            const response = await axiosInstance.put(`/classroom/${classroomId}`, {
+                shift: shift === 'matutino' ? 'morning' : 'afternoon',
+                grade: grade,
+                className: className
+            });
 
-            if (!grade || !className || !shift) {
-                showStatusBar('Todos os campos são obrigatórios.', 'error');
-            } else if (Number.isInteger(grade)) {
-                showStatusBar('Série/ano deve ser um número inteiro', 'error');
+            if (response.status >= 400 && response.status <= 500) {
+                showStatusBar(response.data.message, 'error');
+            } else {
+                getClassrooms();
+            }
+        } catch (error) {
+            console.log(error)
+            showStatusBar('Um erro inesperado aconteceu. Tente novamente.', 'error');
+        }
+        closeModal();
+    };
+
+    const handleAddOrEditClassroom = async () => {
+        if (!grade || !className || !shift) {
+            showStatusBar('Todos os campos são obrigatórios.', 'error');
+        } else if (Number.isInteger(grade)) {
+            showStatusBar('Série/ano deve ser um número inteiro', 'error');
+        } else {
+            if (isEditing) {
+                editClassroom();
             } else {
                 addClassroom();
             }
@@ -126,10 +141,17 @@ const Classrooms = ({ userInfo }) => {
     };
 
     const handleEditClassroom = (classroom) => {
-        setSelectedClassroom(classroom);
+        setClassroomId(classroom._id);
+        setGrade(classroom.grade);
+        setShift(classroom.shift === 'morning' ? 'matutino' : 'vespertino');
+        setClassName(classroom.className);
         setIsEditing(true);
-        openModal();
+        setIsModalOpen(true);
     };
+
+    const openModal = () => {
+        setIsModalOpen(true);
+    }
 
     const handleOpenAlert = (classroom) => {
         if (classroom.totalStudents > 0) {
