@@ -164,7 +164,7 @@ const Classrooms = ({ userInfo }) => {
 
     return (
         <div>
-            <h2>Turmas da escola selecionada</h2>
+            <h2 className='text-center font-semibold'>Turmas da escola selecionada</h2>
             <div className="classroom-container flex">
                 <div className="grid grid-cols-4 gap-4">
                     {classrooms.map((classroom) => (
@@ -174,10 +174,10 @@ const Classrooms = ({ userInfo }) => {
                             <p>Total de alunos: {classroom.totalStudents}</p>
                             <div className="actions">
                                 <button onClick={() => handleEditClassroom(classroom)} className="edit-btn">
-                                    <FaEdit />
+                                    <FaEdit className='text-primary' />
                                 </button>
                                 <button onClick={() => handleOpenAlert(classroom)} className="delete-btn">
-                                    <FaTrash />
+                                    <FaTrash className='text-red-600' />
                                 </button>
                             </div>
                         </div>

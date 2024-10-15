@@ -67,10 +67,8 @@ const hideStatusBar = () => {
         password: password
       });
 
-      console.log(response);
-
       if (response.data && response.data.error) {
-        showStatusBar(response.data.error, 'error');
+        showStatusBar(response.data.message, 'error');
         return
       }
 

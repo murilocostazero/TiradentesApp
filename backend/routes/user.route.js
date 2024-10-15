@@ -14,24 +14,24 @@ router.post('/create-account', async (req, res) => {
     const { name, rank, email, password } = req.body;
 
     if (!name) {
-        return res.status(400).json({ err: true, message: 'Nome é um campo obrigatório' });
+        return res.status(400).json({ error: true, message: 'Nome é um campo obrigatório' });
     }
 
     if (!rank) {
-        return res.status(400).json({ err: true, message: 'Patente é um campo obrigatório' });
+        return res.status(400).json({ error: true, message: 'Patente é um campo obrigatório' });
     }
 
     if (!email) {
-        return res.status(400).json({ err: true, message: 'Email é um campo obrigatório' });
+        return res.status(400).json({ error: true, message: 'Email é um campo obrigatório' });
     }
 
     if (!password) {
-        return res.status(400).json({ err: true, message: 'Senha é um campo obrigatório' });
+        return res.status(400).json({ error: true, message: 'Senha é um campo obrigatório' });
     }
 
     const isUser = await User.findOne({ email });
     if (isUser) {
-        return res.json({ err: true, message: 'Usuário já cadastrado' });
+        return res.json({ error: true, message: 'Usuário já cadastrado' });
     }
 
     const user = new User({
