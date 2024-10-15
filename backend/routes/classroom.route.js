@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Classroom = require('../models/classroom.model');
+const { authenticateToken } = require('../utilities');
 
 // Buscar uma turma por ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
     try {
         const classItem = await Classroom.findById(req.params.id).populate('school');
         if (!classItem) {
@@ -16,7 +17,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Buscar todas as turmas de uma escola
-router.get('/school/:schoolId', async (req, res) => {
+router.get('/school/:schoolId', authenticateToken, async (req, res) => {
     try {
         const classes = await Classroom.find({ school: req.params.schoolId });
         if (classes.length === 0) {
@@ -29,7 +30,7 @@ router.get('/school/:schoolId', async (req, res) => {
 });
 
 // Criar uma nova turma
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
     const { shift, grade, className, school, totalStudents } = req.body;
 
     if (!shift || !grade || !className || !school) {
@@ -53,7 +54,7 @@ router.post('/', async (req, res) => {
 });
 
 // Editar os dados de uma turma
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
     const { shift, grade, className, totalStudents } = req.body;
 
     try {
@@ -74,7 +75,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Deletar uma turma
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
     try {
         const deletedClassroom = await Classroom.findByIdAndDelete(req.params.id);
         if (!deletedClassroom) {
