@@ -7,7 +7,7 @@ import { FaPeopleGroup } from "react-icons/fa6";
 import { MdOutlineEditNote } from "react-icons/md";
 import School from '../../components/School/School';
 import Incidents from '../../components/Incidents/Incidents';
-import ClassOfStudents from '../../components/ClassOfStudents/ClassOfStudents';
+import Classroom from '../../components/Classroom/Classroom';
 
 const Home = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -85,13 +85,13 @@ const Home = () => {
               </div>
             </li>
             <li
-              className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'ClassOfStudents' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
-              onClick={() => handleMenuClick('ClassOfStudents')}
+              className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'Classroom' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
+              onClick={() => handleMenuClick('Classroom')}
             >
               Turmas
               <FaPeopleGroup
                 size={22}
-                className={`${selectedOption === 'ClassOfStudents' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
+                className={`${selectedOption === 'Classroom' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
             </li>
             <li
               className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'Incident' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
@@ -116,8 +116,8 @@ const Home = () => {
                 handleSelectedSchool={handleSelectedSchool}
                 loading={loading} />
               :
-              selectedOption === 'ClassOfStudents' ?
-                <ClassOfStudents selectedSchool={selectedSchool} />
+              selectedOption === 'Classroom' ?
+                <Classroom userInfo={userInfo} />
                 :
                 selectedOption === 'Incident' ?
                   <Incidents /> : <div />

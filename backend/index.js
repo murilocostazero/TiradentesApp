@@ -17,10 +17,12 @@ app.use(cors({ origin: '*' }));
 // Importar as rotas
 const userRoute = require('./routes/user.route');
 const schoolRoute = require('./routes/school.route');
+const classroom = require('./routes/classroom.route');
 
 // Usar as rotas
 app.use('/', userRoute);
 app.use('/school', schoolRoute);
+app.use('/classroom', classroom);
 
 // Iniciar o servidor
 app.listen(8000, () => {
