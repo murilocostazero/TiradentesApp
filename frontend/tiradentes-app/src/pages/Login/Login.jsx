@@ -5,11 +5,16 @@ import { Link, useNavigate } from 'react-router-dom'
 import { validateEmail } from '../../utils/helper'
 import DevelopedBy from '../../components/DevelopedBy/DevelopedBy'
 import axiosInstance from '../../utils/axiosIntance'
+import StatusBar from '../../components/StatusBar/StatusBar'
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [statusBar, setStatusBar] = useState({
+        message: '',
+        type: '',
+        isVisible: false,
+    });
 
     const navigate = useNavigate();
 
@@ -17,16 +22,15 @@ const Login = () => {
         e.preventDefault();
 
         if (!validateEmail(email)) {
-            setError('Por favor, insira um email válido.');
+            showStatusBar('Insira um email válido','error');
             return;
         }
 
         if (!password) {
-            setError('Senha inválida');
+            showStatusBar('Senha inválida','error');
             return;
         }
 
-        setError('');
 
         //Login API call
         try {
@@ -39,17 +43,32 @@ const Login = () => {
                 localStorage.setItem('token', response.data.accessToken);
                 navigate('/dashboard');
             } else if (response.data && response.data.error) {
-                setError(response.data.message);
+                showStatusBar(response.data.message,'error');
             }
         } catch (error) {
             console.log(error)
             if (error.response.data.message) {
-                setError(error.response.data.message)
+                showStatusBar(error.response.data.message,'error');
             } else {
-                setError('Um erro inesperado aconteceu. Tente novamente.');
+                showStatusBar('Um erro inesperado aconteceu. Tente novamente.','error');
             }
         }
     }
+
+    const showStatusBar = (message, type) => {
+        setStatusBar({
+            message,
+            type,
+            isVisible: true,
+        });
+    };
+
+    const hideStatusBar = () => {
+        setStatusBar((prev) => ({
+            ...prev,
+            isVisible: false,
+        }));
+    };
 
     return (
         <>
@@ -70,8 +89,6 @@ const Login = () => {
 
                         <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
 
-                        {error && <p className='text-red-500 text-xs pb-1'>{error}</p>}
-
                         <button type='submit' className='btn-primary'>Login</button>
 
                         <p className='text-sm text-center mt-4'>
@@ -83,7 +100,12 @@ const Login = () => {
                     </form>
                 </div>
             </div>
-
+            <StatusBar
+                message={statusBar.message}
+                type={statusBar.type}
+                isVisible={statusBar.isVisible}
+                onClose={hideStatusBar}
+            />
             <DevelopedBy />
         </>
     )

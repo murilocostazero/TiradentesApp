@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaUndo } from 'react-icons/fa';
-import Modal from 'react-modal'; // Vamos usar react-modal para facilitar
 import './Classroom.css'; // Estilizações específicas
 import axiosInstance from '../../utils/axiosIntance';
+import StatusBar from '../StatusBar/StatusBar';
 
 const Classrooms = ({ userInfo }) => {
     const [classrooms, setClassrooms] = useState([]);
@@ -16,7 +16,11 @@ const Classrooms = ({ userInfo }) => {
     const [tempDeletedClassroom, setTempDeletedClassroom] = useState(null);
     const [isUndoVisible, setIsUndoVisible] = useState(false);
     const [timeoutId, setTimeoutId] = useState(null);
-    const [errorLabel, setErrorLabel] = useState('');
+    const [statusBar, setStatusBar] = useState({
+        message: '',
+        type: '',
+        isVisible: false,
+    });
 
     useEffect(() => {
         getClassrooms();
@@ -26,20 +30,34 @@ const Classrooms = ({ userInfo }) => {
         setIsModalOpen(true);
     };
 
+    const showStatusBar = (message, type) => {
+        setStatusBar({
+            message,
+            type,
+            isVisible: true,
+        });
+    };
+
+    const hideStatusBar = () => {
+        setStatusBar((prev) => ({
+            ...prev,
+            isVisible: false,
+        }));
+    };
+
     const closeModal = () => {
         setIsModalOpen(false);
         setIsEditing(false);
         setGrade(0);
         setClassName('');
         setShift('');
-        setErrorLabel('');
     };
 
     const getClassrooms = async () => {
         try {
             const response = await axiosInstance.get(`/classroom/school/${userInfo.lastSelectedSchool}`);
             if (response.status === 404 || response.status === 500) {
-                setErrorLabel('Nenhuma turma encontrada');
+                showStatusBar('Nenhuma turma encontrada', 'error');
             } else {
                 setClassrooms(response.data)
             }
@@ -60,13 +78,13 @@ const Classrooms = ({ userInfo }) => {
             });
 
             if (response.status === 400 || response.status === 500) {
-                setErrorLabel(response.data.message)
+                showStatusBar(response.data.message, 'error');
             } else {
                 getClassrooms();
             }
         } catch (error) {
             console.log(error)
-            setErrorLabel('Um erro inesperado aconteceu. Tente novamente.');
+            showStatusBar('Um erro inesperado aconteceu. Tente novamente.', 'error');
         }
         closeModal();
     };
@@ -80,9 +98,9 @@ const Classrooms = ({ userInfo }) => {
             // fetch('/api/classrooms', {method: 'POST', body: {shift, grade, className, totalStudents}})
 
             if (!grade || !className || !shift) {
-                setErrorLabel('Todos os campos são obrigatórios.');
+                showStatusBar('Todos os campos são obrigatórios.', 'error');
             } else if (Number.isInteger(grade)) {
-                setErrorLabel('Série/ano deve ser um número inteiro');
+                showStatusBar('Série/ano deve ser um número inteiro', 'error');
             } else {
                 addClassroom();
             }
@@ -199,8 +217,6 @@ const Classrooms = ({ userInfo }) => {
                                 </label>
                             </div>
 
-                            {errorLabel && <p className='text-red-500 text-xs pb-1'>{errorLabel}</p>}
-
                             <div className="flex justify-end">
                                 <button
                                     onClick={() => {
@@ -221,6 +237,12 @@ const Classrooms = ({ userInfo }) => {
                     </div>
                 )}
             </div>
+            <StatusBar
+                message={statusBar.message}
+                type={statusBar.type}
+                isVisible={statusBar.isVisible}
+                onClose={hideStatusBar}
+            />
         </div>
     );
 };

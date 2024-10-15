@@ -5,40 +5,58 @@ import { Link, useNavigate } from 'react-router-dom';
 import DevelopedBy from '../../components/DevelopedBy/DevelopedBy';
 import axiosInstance from '../../utils/axiosIntance';
 import { validateEmail } from '../../utils/helper';
+import StatusBar from '../../components/StatusBar/StatusBar';
 
 const SingUp = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedRank, setSelectedRank] = useState('');
-  const [error, setError] = useState('');
+  const [statusBar, setStatusBar] = useState({
+    message: '',
+    type: '',
+    isVisible: false,
+});
 
   const navigate = useNavigate();
+
+  const showStatusBar = (message, type) => {
+    setStatusBar({
+        message,
+        type,
+        isVisible: true,
+    });
+};
+
+const hideStatusBar = () => {
+    setStatusBar((prev) => ({
+        ...prev,
+        isVisible: false,
+    }));
+};
 
   const handleSingUp = async (e) => {
     e.preventDefault();
 
     if (!name) {
-      setError('Por favor, insira um nome.');
+      showStatusBar('Por favor, insira um nome.', 'error');
       return;
     }
 
     if (!selectedRank) {
-      setError('Por favor, escolha um Posto/Graduação.');
+      showStatusBar('Por favor, escolha um Posto/Graduação.', 'error');
       return;
     }
 
     if (!validateEmail(email)) {
-      setError('Por favor, insira um email válido.');
+      showStatusBar('Por favor, insira um email válido.', 'error');
       return;
     }
 
     if (!password) {
-      setError('Por favor, insira uma senha.');
+      showStatusBar('Por favor, insira uma senha.', 'error');
       return;
     }
-
-    setError('');
 
     //SingUp API call
     try {
@@ -52,18 +70,18 @@ const SingUp = () => {
       console.log(response);
 
       if (response.data && response.data.error) {
-        setError(response.data.error);
+        showStatusBar(response.data.error, 'error');
         return
-      } 
+      }
 
       if (response.data && response.data.accessToken) {
         localStorage.setItem('token', response.data.accessToken);
         navigate('/dashboard');
-      } 
+      }
 
     } catch (error) {
       console.log(error)
-      setError('Um erro inesperado aconteceu. Tente novamente.');
+      showStatusBar('Um erro inesperado aconteceu. Tente novamente.', 'error');
     }
   }
 
@@ -119,8 +137,6 @@ const SingUp = () => {
 
             <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
 
-            {error && <p className='text-red-500 text-xs pb-1'>{error}</p>}
-
             <button type='submit' className='btn-primary'>Criar conta</button>
 
             <p className='text-sm text-center mt-4'>
@@ -132,7 +148,12 @@ const SingUp = () => {
           </form>
         </div>
       </div>
-
+      <StatusBar
+        message={statusBar.message}
+        type={statusBar.type}
+        isVisible={statusBar.isVisible}
+        onClose={hideStatusBar}
+      />
       <DevelopedBy />
     </>
   )

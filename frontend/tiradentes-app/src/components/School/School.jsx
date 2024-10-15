@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaSave, FaCheck } from 'react-icons/fa';
 import axiosInstance from '../../utils/axiosIntance';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import StatusBar from '../StatusBar/StatusBar';
 import './School.css';
 
 const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => {
@@ -17,7 +18,11 @@ const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => 
   const [deletingSchool, setDeletingSchool] = useState(null); // Armazena a escola em processo de exclusão
   const [deleteTimeoutId, setDeleteTimeoutId] = useState(null); // Armazena o timeout
 
-  const [errorLabel, setErrorLabel] = useState('');
+  const [statusBar, setStatusBar] = useState({
+    message: '',
+    type: '',
+    isVisible: false,
+  });
 
   const getSchools = async () => {
     try {
@@ -34,10 +39,25 @@ const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => 
     getSchools();
   }, []);
 
+  const showStatusBar = (message, type) => {
+    setStatusBar({
+      message,
+      type,
+      isVisible: true,
+    });
+  };
+
+  const hideStatusBar = () => {
+    setStatusBar((prev) => ({
+      ...prev,
+      isVisible: false,
+    }));
+  };
+
   // Função para adicionar uma nova escola
   const addSchool = async () => {
     if (!newSchoolName || !newAddress || !newPhoneNumber) {
-      setErrorLabel('Todos os campos são obrigatórios');
+      showStatusBar('Todos os campos são obrigatórios', 'error');
     } else {
 
       //API call
@@ -49,13 +69,13 @@ const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => 
         });
 
         if (response.status === 400 || response.status === 500) {
-          setError(response.data.message)
+          showStatusBar(response.data.message, 'error');
         } else {
           getSchools();
         }
       } catch (error) {
         console.log(error)
-        setError('Um erro inesperado aconteceu. Tente novamente.');
+        showStatusBar('Um erro inesperado aconteceu. Tente novamente.', 'error');
       }
 
       clearFields();
@@ -87,13 +107,13 @@ const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => 
       const response = await axiosInstance.delete(`/school/${schoolId}`);
 
       if (response.status === 400 || response.status === 500) {
-        setError(response.data.message)
+        setError(response.data.message, 'error');
       } else {
         getSchools();
       }
     } catch (error) {
       console.log(error)
-      setError('Um erro inesperado aconteceu. Tente novamente.');
+      setError('Um erro inesperado aconteceu. Tente novamente.', 'error');
     }
   }
 
@@ -108,7 +128,7 @@ const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => 
 
   const saveSchoolModifications = async () => {
     if (!newSchoolName || !newAddress || !newPhoneNumber) {
-      setError('Todos os campos são obrigatórios.');
+      showStatusBar('Todos os campos são obrigatórios.', 'error');
     } else {
       //API call
       try {
@@ -119,7 +139,7 @@ const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => 
         });
 
         if (response.status === 400 || response.status === 500) {
-          setError(response.data.message)
+          showStatusBar(response.data.message, 'error');
         } else {
           setEditingSchool(false);
           setShowModal(false);
@@ -128,7 +148,7 @@ const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => 
         }
       } catch (error) {
         console.log(error)
-        setError('Um erro inesperado aconteceu. Tente novamente.');
+        showStatusBar('Um erro inesperado aconteceu. Tente novamente.', 'error');
       }
     }
   }
@@ -137,7 +157,6 @@ const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => 
     setNewSchoolName('');
     setNewAddress('');
     setNewPhoneNumber('');
-    setErrorLabel('');
   }
 
   return (
@@ -179,8 +198,6 @@ const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => 
               className="border p-2 w-full mb-4 rounded-md"
               placeholder="Telefone de contato"
             />
-
-            {errorLabel && <p className='text-red-500 text-xs pb-1'>{errorLabel}</p>}
 
             <div className="flex justify-end">
               <button
@@ -254,6 +271,13 @@ const School = ({ userInfo, selectedSchool, handleSelectedSchool, loading }) => 
           </div>
         ))}
       </div>
+
+      <StatusBar
+        message={statusBar.message}
+        type={statusBar.type}
+        isVisible={statusBar.isVisible}
+        onClose={hideStatusBar}
+      />
     </div>
   );
 };
