@@ -18,11 +18,13 @@ app.use(cors({ origin: '*' }));
 const userRoute = require('./routes/user.route');
 const schoolRoute = require('./routes/school.route');
 const classroom = require('./routes/classroom.route');
+const student = require('./routes/student.route');
 
 // Usar as rotas
 app.use('/', userRoute);
 app.use('/school', schoolRoute);
 app.use('/classroom', classroom);
+app.use('/student', student);
 
 // Iniciar o servidor
 app.listen(8000, () => {

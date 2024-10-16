@@ -5,9 +5,12 @@ import axiosInstance from '../../utils/axiosIntance';
 import { FaSchool } from "react-icons/fa";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { MdOutlineEditNote } from "react-icons/md";
+import { PiStudentFill } from "react-icons/pi";
 import School from '../../components/School/School';
 import Incidents from '../../components/Incidents/Incidents';
 import Classroom from '../../components/Classroom/Classroom';
+import Student from '../../components/Student/Student';
+import NoDataLoaded from '../../components/NoDataLoaded/NoDataLoaded';
 
 const Home = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -69,61 +72,76 @@ const Home = () => {
   return (
     <>
       <Navbar userInfo={userInfo} />
-      <div className="flex h-screen">
-        {/* Menu Lateral */}
-        <div className="w-1/6 bg-gray-100 p-4">
-          <ul>
-            <li
-              className={`cursor-pointer p-2 ${selectedOption === 'School' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
-              onClick={() => handleMenuClick('School')}
-            >
-              <div className='flex justify-between items-center'>
-                Escola
-                <FaSchool
-                  size={22}
-                  className={`${selectedOption === 'School' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
-              </div>
-            </li>
-            <li
-              className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'Classroom' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
-              onClick={() => handleMenuClick('Classroom')}
-            >
-              Turmas
-              <FaPeopleGroup
-                size={22}
-                className={`${selectedOption === 'Classroom' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
-            </li>
-            <li
-              className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'Incident' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
-              onClick={() => handleMenuClick('Incident')}
-            >
-              Ocorrências
-              <MdOutlineEditNote
-                size={22}
-                className={`${selectedOption === 'Incident' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
-            </li>
-            {/* Adicione mais opções conforme necessário */}
-          </ul>
-        </div>
+      {
+        !userInfo ?
+          <NoDataLoaded /> :
+          <div className="flex h-screen">
+            {/* Menu Lateral */}
+            <div className="w-1/6 bg-gray-100 p-4">
+              <ul>
+                <li
+                  className={`cursor-pointer p-2 ${selectedOption === 'School' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
+                  onClick={() => handleMenuClick('School')}
+                >
+                  <div className='flex justify-between items-center'>
+                    Escola
+                    <FaSchool
+                      size={22}
+                      className={`${selectedOption === 'School' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
+                  </div>
+                </li>
+                <li
+                  className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'Classroom' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
+                  onClick={() => handleMenuClick('Classroom')}
+                >
+                  Turmas
+                  <FaPeopleGroup
+                    size={22}
+                    className={`${selectedOption === 'Classroom' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
+                </li>
+                <li
+                  className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'Student' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
+                  onClick={() => handleMenuClick('Student')}
+                >
+                  Alunos
+                  <PiStudentFill
+                    size={22}
+                    className={`${selectedOption === 'Student' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
+                </li>
+                <li
+                  className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'Incident' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
+                  onClick={() => handleMenuClick('Incident')}
+                >
+                  Ocorrências
+                  <MdOutlineEditNote
+                    size={22}
+                    className={`${selectedOption === 'Incident' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
+                </li>
+                {/* Adicione mais opções conforme necessário */}
+              </ul>
+            </div>
 
-        {/* Área Central */}
-        <div className="flex-grow p-6 bg-white">
-          {
-            selectedOption === 'School' && userInfo ?
-              <School
-                userInfo={userInfo}
-                selectedSchool={selectedSchool}
-                handleSelectedSchool={handleSelectedSchool}
-                loading={loading} />
-              :
-              selectedOption === 'Classroom' ?
-                <Classroom userInfo={userInfo} />
-                :
-                selectedOption === 'Incident' ?
-                  <Incidents /> : <div />
-          }
-        </div>
-      </div>
+            {/* Área Central */}
+            <div className="flex-grow p-6 bg-white">
+              {
+                selectedOption === 'School' && userInfo ?
+                  <School
+                    userInfo={userInfo}
+                    selectedSchool={selectedSchool}
+                    handleSelectedSchool={handleSelectedSchool}
+                    loading={loading} />
+                  :
+                  selectedOption === 'Classroom' ?
+                    <Classroom userInfo={userInfo} />
+                    :
+                    selectedOption === 'Student' ?
+                      <Student userInfo={userInfo} /> :
+                      selectedOption === 'Incident' ?
+                        <Incidents /> : <div />
+              }
+            </div>
+          </div>
+      }
     </>
   )
 }

@@ -165,10 +165,10 @@ const Classrooms = ({ userInfo }) => {
     return (
         <div>
             <h2 className='text-center font-semibold'>Turmas da escola selecionada</h2>
-            <div className="classroom-container flex">
-                <div className="grid grid-cols-4 gap-4">
+            <div className="classroom-container flex justify-center">
+                <div className="grid grid-cols-4 gap-4 items-center">
                     {classrooms.map((classroom) => (
-                        <div key={classroom._id} className="classroom-item">
+                        <div key={classroom._id} className="classroom-item bg-slate-50 shadow-md">
                             <h3 className='font-bold'>{classroom.grade}º ANO {classroom.className.toUpperCase()}</h3>
                             <p>Turno: {classroom.shift === 'morning' ? 'matutino' : 'vespertino'}</p>
                             <p>Total de alunos: {classroom.totalStudents}</p>
