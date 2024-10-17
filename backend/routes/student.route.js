@@ -162,7 +162,7 @@ router.get('/classroom/:classroomId', authenticateToken, async (req, res) => {
         const students = await Student.find({ classroom: req.params.classroomId });
 
         if (students.length === 0) {
-            return res.status(404).json([]);
+            return res.status(200).json([]);
         }
 
         res.json(students);

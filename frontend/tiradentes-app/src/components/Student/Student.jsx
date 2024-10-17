@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import InputMask from 'react-input-mask';
-import { FaMagnifyingGlass } from 'react-icons/fa6';
+import { FaCircleUser } from 'react-icons/fa6';
 import { IoMdClose } from 'react-icons/io';
 import axiosInstance from '../../utils/axiosIntance';
 import StatusBar from '../StatusBar/StatusBar';
@@ -22,6 +22,10 @@ const Student = ({ userInfo }) => {
     isVisible: false,
   });
   const [loading, setLoading] = useState(false);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [students, setStudents] = useState([]);
+  const [searchStudent, setSearchStudent] = useState('');
+  const [filteredStudents, setFilteredStudents] = useState([]);
 
   const [fullName, setFullName] = useState(''); // Nome completo
   const [dateOfBirth, setDateOfBirth] = useState(''); // Data de nascimento
@@ -46,7 +50,7 @@ const Student = ({ userInfo }) => {
       if (response.status >= 400 && response.status <= 500) {
         showStatusBar('Nenhuma turma encontrada', 'error');
       } else {
-        setClassrooms(response.data)
+        setClassrooms(response.data);
       }
     } catch (error) {
       console.log(error);
@@ -57,8 +61,25 @@ const Student = ({ userInfo }) => {
     classroom.grade.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getStudents = async () => {
-    console.log('XABLAU, LINEUZINHO')
+  const getStudents = async (classroom) => {
+    setLoadingStudents(true);
+    try {
+      const response = await axiosInstance.get(`/student/classroom/${classroom._id}`, {
+        timeout: 10000
+      });
+      if (response.data || response.data == []) {
+        setStudents(response.data);
+        setFilteredStudents(response.data);
+      }
+    } catch (error) {
+      if (error.code === 'ECONNABORTED') {
+        showStatusBar('Verifique sua conexão com a internet e tente novamente.', 'error');
+      } else {
+        console.log(error)
+        showStatusBar('Um erro inesperado aconteceu.', 'error');
+      }
+    }
+    setLoadingStudents(false);
   }
 
   // Função para adicionar um novo aluno
@@ -116,10 +137,14 @@ const Student = ({ userInfo }) => {
     setShowModal(false);
   }
 
-  const handleSelectClass = (classroom) => {
-    // console.log(classroom)
-    setSelectedStudentsClass(classroom);
+  const handleSelectClass = async (classroom) => {
+    setFilteredStudents([]);
+    setSearchStudent('');
+    setStudents([]);
     setShowSearchClassroom(false);
+    setSelectedStudentsClass(classroom);
+
+    getStudents(classroom);
   }
 
   const openSearchClass = () => {
@@ -139,6 +164,16 @@ const Student = ({ userInfo }) => {
       ...prev,
       isVisible: false,
     }));
+  };
+
+  const filteredStudentsList = students.filter((student) =>
+    student.fullName.toLowerCase().includes(searchStudent.toLowerCase())
+  );
+
+  const openWhatsApp = (phoneNumber) => {
+    const formattedNumber = phoneNumber.replace(/\D/g, ''); // Remove caracteres não numéricos
+    const whatsappUrl = `https://wa.me/55${formattedNumber}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   return (
@@ -335,6 +370,57 @@ const Student = ({ userInfo }) => {
                 <p className="text-gray-500">Nenhuma turma encontrada</p>
               )}
             </div>
+          </div>
+      }
+
+      {
+        !selectedStudentsClass ?
+          <div /> :
+          loadingStudents ? 
+          <LoadingSpinner /> :
+          <div className="p-6 flex flex-col items-center">
+            {/* Lista horizontal de cards */}
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {filteredStudentsList.length > 0 ? (
+                filteredStudentsList.map((student) => (
+                  <div
+                    key={student._id}
+                    className="w-64 p-4 bg-white rounded-lg shadow-md flex-shrink-0"
+                  >
+                    <FaCircleUser className="text-6xl text-gray-400 mx-auto" />
+                    <h2 className="text-center text-lg font-semibold mt-2">{student.fullName}</h2>
+                    <p className="text-center text-sm text-gray-600">
+                      {selectedStudentsClass.grade}º Ano - {selectedStudentsClass.className}
+                    </p>
+                    <p
+                      className="text-center text-sm text-slate-600"
+                      onClick={() => openWhatsApp(student.guardianContact)}
+                    >
+                      Responsável: <span className='text-primary cursor-pointer underline'>{student.guardianContact}</span>
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-500">Essa turma está vazia</p>
+              )}
+            </div>
+
+            {/* Barra de pesquisa */}
+            {
+              filteredStudentsList.length > 0 ?
+                <div className="mt-4 bg-slate-50 flex items-center rounded-md shadow-md p-2">
+                  <input
+                    type="text"
+                    placeholder="Filtrar aluno..."
+                    value={searchStudent}
+                    onChange={(e) => setSearchStudent(e.target.value)}
+                    className="w-80 h-10 focus:outline-none bg-transparent"
+                  />
+                  <IoMdClose className={'text-slate-600'} onClick={() => setSearchStudent('')} />
+                </div>
+                :
+                <div />
+            }
           </div>
       }
 
