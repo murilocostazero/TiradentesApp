@@ -19,7 +19,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // Buscar todas as turmas de uma escola
 router.get('/school/:schoolId', authenticateToken, async (req, res) => {
     try {
-        const classes = await Classroom.find({ school: req.params.schoolId });
+        const classes = await Classroom.find({ school: req.params.schoolId }).sort({ grade: 1, className: 1 });
         if (classes.length === 0) {
             return res.status(404).json({ message: 'Nenhuma turma encontrada para esta escola' });
         }

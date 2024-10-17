@@ -159,7 +159,7 @@ router.put('/add-fo/:id', authenticateToken, async (req, res) => {
 // Rota 8: Buscar todos os alunos de uma turma
 router.get('/classroom/:classroomId', authenticateToken, async (req, res) => {
     try {
-        const students = await Student.find({ classroom: req.params.classroomId });
+        const students = await Student.find({ classroom: req.params.classroomId }).sort({ fullName: 1 });
 
         if (students.length === 0) {
             return res.status(200).json([]);
