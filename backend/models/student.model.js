@@ -19,7 +19,7 @@ const student = new Schema({
     },
     gender: {
         type: String,
-        enum: ['Male', 'Female', 'Other'],
+        enum: ['male', 'female', 'other'],
         required: true,
     },
     address: {

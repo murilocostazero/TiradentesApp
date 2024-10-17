@@ -23,7 +23,12 @@ export const firstAndLastName = (name) => {
     if (nameParts.length > 1) {
         return `${nameParts[0]} ${nameParts[1]}`;
     }
-    
+
     // Se o nome tiver apenas uma palavra, retornamos essa palavra
     return nameParts[0];
+}
+
+export const stringToDate = (dateString) => {
+    const [day, month, year] = dateString.split('/').map(Number);
+    return new Date(year, month - 1, day);
 }

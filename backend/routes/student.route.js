@@ -20,6 +20,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // Rota 2: Adicionar 1 aluno e incrementar o total de alunos da turma escolhida
 router.post('/', authenticateToken, async (req, res) => {
+    console.log(req.body)
     try {
         const { fullName, dateOfBirth, cpf, gender, address, contact, guardianName, guardianContact, classroomId } = req.body;
 
