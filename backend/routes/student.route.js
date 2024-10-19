@@ -50,7 +50,7 @@ router.post('/', authenticateToken, async (req, res) => {
 // Rota 3: Editar os dados de 1 aluno (não é possível alterar a turma)
 router.put('/:id', authenticateToken, async (req, res) => {
     try {
-        const { fullName, dateOfBirth, cpf, gender, address, contact, guardianName, guardianContact, behavior, photoUrl } = req.body;
+        const { fullName, dateOfBirth, cpf, gender, address, contact, guardianName, guardianContact, behavior } = req.body;
 
         const updatedStudent = await Student.findByIdAndUpdate(req.params.id, {
             fullName,
@@ -61,8 +61,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
             contact,
             guardianName,
             guardianContact,
-            behavior,
-            photoUrl
+            behavior
         }, { new: true });
 
         if (!updatedStudent) {

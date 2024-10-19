@@ -7,6 +7,7 @@ import axiosInstance from '../../utils/axiosIntance';
 import StatusBar from '../StatusBar/StatusBar';
 import { stringToDate } from '../../utils/helper';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import SelectedStudent from '../SelectedStudent/SelectedStudent';
 
 const Student = ({ userInfo }) => {
 
@@ -16,16 +17,14 @@ const Student = ({ userInfo }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudentsClass, setSelectedStudentsClass] = useState(null);
   const [showSearchClassroom, setShowSearchClassroom] = useState(false);
-  const [statusBar, setStatusBar] = useState({
-    message: '',
-    type: '',
-    isVisible: false,
-  });
+  const [statusBar, setStatusBar] = useState({ message: '', type: '', isVisible: false });
+
   const [loading, setLoading] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [students, setStudents] = useState([]);
   const [searchStudent, setSearchStudent] = useState('');
   const [filteredStudents, setFilteredStudents] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   const [fullName, setFullName] = useState(''); // Nome completo
   const [dateOfBirth, setDateOfBirth] = useState(''); // Data de nascimento
@@ -177,6 +176,12 @@ const Student = ({ userInfo }) => {
   };
 
   return (
+    selectedStudent ? 
+    <SelectedStudent 
+      deselectStudent={() => setSelectedStudent(null)} 
+      student={selectedStudent}
+      classrooms={classrooms}
+      selectedStudentsClass={selectedStudentsClass} /> :
     <div className="relative w-full h-full">
       {/* ----------------------------------MODAL--------------------------------- */}
       {showModal && (
@@ -324,7 +329,7 @@ const Student = ({ userInfo }) => {
         </div>
       )}
 
-      {/* -----------------------------------MODAL-------------------------------- */}
+      {/* -----------------------------------FIM MODAL-------------------------------- */}
 
       <div className='justify-end flex flex-row'>
         <div className='flex items-center mr-4'>
@@ -385,7 +390,8 @@ const Student = ({ userInfo }) => {
                 filteredStudentsList.map((student) => (
                   <div
                     key={student._id}
-                    className="w-64 p-4 bg-white rounded-lg shadow-md flex-shrink-0"
+                    className="w-64 p-4 bg-white rounded-lg shadow-md cursor-pointer flex-shrink-0 hover:bg-blue-300"
+                    onClick={() => setSelectedStudent(student)}
                   >
                     <FaCircleUser className="text-6xl text-gray-400 mx-auto" />
                     <h2 className="text-center text-lg font-semibold mt-2">{student.fullName}</h2>
