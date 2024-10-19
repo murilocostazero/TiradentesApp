@@ -6,14 +6,15 @@ import StatusBar from '../StatusBar/StatusBar';
 import axiosInstance from '../../utils/axiosIntance';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import InputMask from 'react-input-mask';
+import SelectClassroom from '../SelectClassroom/SelectClassroom';
 
-const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudentsClass }) => {
+const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudentsClass, getStudent }) => {
 
-    const [fullName, setName] = useState(student.fullName);
+    const [fullName, setFullName] = useState(student.fullName);
     const [contact, setContact] = useState(student.contact);
     const [cpf, setCpf] = useState(student.cpf);
     const [dateOfBirth, setDateOfBirth] = useState(dateToString(student.dateOfBirth));
-    const [guardianName, setResponsible] = useState(student.guardianName);
+    const [guardianName, setGuardianName] = useState(student.guardianName);
     const [guardianContact, setGuardianContact] = useState(student.guardianContact);
     const [behavior, setBehavior] = useState(student.behavior);
     const [address, setAddress] = useState(student.address);
@@ -22,17 +23,20 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
     const [positiveFacts, setPositiveFacts] = useState(student.positiveFacts || []);
 
     const [statusBar, setStatusBar] = useState({ message: '', type: '', isVisible: false });
-    const [loadingSaveStudent, setSaveStudent] = useState(false);
+    const [loadingSaveStudent, setLoadingSaveStudent] = useState(false);
+    const [loadingChangeClass, setLoadingChangeClass] = useState(false);
+    const [showSearchClassroom, setShowSearchClassroom] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        console.log(classrooms)
+
     }, []);
 
     const editStudent = async () => {
         if (!fullName || !contact || !cpf || !dateOfBirth || !guardianName || !guardianContact || !address || !gender || !behavior) {
             showStatusBar('Nenhum dos campos deve ficar vazio', 'error');
         } else {
-            setSaveStudent(true);
+            setLoadingSaveStudent(true);
             try {
                 const response = await axiosInstance.put(`/student/${student._id}`, {
                     fullName: fullName,
@@ -50,13 +54,14 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
 
                 if (response.status >= 400 && response.status <= 500) {
                     showStatusBar(response.data.message, 'error');
-                    // BUSCAR O ALUNO NOVAMENTE E PREENCHER OS CAMPOS
+                } else {
+                    getStudent(student._id);
                 }
             } catch (error) {
                 console.error('Erro ao atualizar os dados do aluno:', error);
                 showStatusBar('Houve um problema ao atualizar os dados do aluno. Tente novamente.', 'error');
             }
-            setSaveStudent(false);
+            setLoadingSaveStudent(false);
         }
     };
 
@@ -75,6 +80,35 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
         }));
     };
 
+    const openSearchClass = () => {
+        setShowSearchClassroom(!showSearchClassroom)
+    }
+
+    const filteredStudentsClass = classrooms.filter((classroom) =>
+        classroom.grade.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const handleSelectClass = async (selectedClassroom) => {
+        setLoadingChangeClass(true);
+        try {
+            const response = await axiosInstance.put(`/student/change-classroom/${student._id}`, {
+                newClassroomId: selectedClassroom._id
+            }, {
+                timeout: 10000, // 10 segundos
+            });
+
+            if (response.status >= 400 && response.status <= 500) {
+                showStatusBar(response.data.message, 'error');
+            } else {
+                getStudent(student._id);
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar os dados do aluno:', error);
+            showStatusBar('Houve um problema ao atualizar os dados do aluno. Tente novamente.', 'error');
+        }
+        setLoadingChangeClass(false);
+    }
+
     return (
         <div className='w-full h-full'>
             <div className="flex items-center justify-between bg-gray-100 p-4 rounded shadow-md">
@@ -87,19 +121,6 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
                     />
                     <span className="ml-4 font-bold text-lg">{student.fullName.toUpperCase()}</span>
                 </div>
-
-                {/* Turma e Botão "Trocar de Turma" */}
-                <div className="flex items-center gap-2">
-                    <span className="text-black font-bold">
-                        {`${selectedStudentsClass.grade}º ano ${selectedStudentsClass.className}`}
-                    </span>
-                    <button
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded transition"
-                        onClick={() => { }}
-                    >
-                        Trocar de turma
-                    </button>
-                </div>
             </div>
 
 
@@ -107,7 +128,7 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
             {
                 loadingSaveStudent ?
                     <LoadingSpinner /> :
-                    <div className="flex space-x-6 mt-8">
+                    <div className="flex space-x-6 mt-8 mb-8">
                         <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-300">
                             {/* Simula a imagem do perfil */}
                             <img
@@ -136,7 +157,7 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
                                     <input
                                         type="text"
                                         value={fullName}
-                                        onChange={(e) => setName(e.target.value)}
+                                        onChange={(e) => setFullName(e.target.value)}
                                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -249,6 +270,21 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
                             </div>
                         </div>
                     </div>
+            }
+
+            {/* Trocar de turma */}
+            {
+                loadingChangeClass ?
+                    <LoadingSpinner /> :
+                    <SelectClassroom
+                        selectedStudentsClass={selectedStudentsClass}
+                        openSearchClass={() => openSearchClass()}
+                        showSearchClassroom={showSearchClassroom}
+                        searchQuery={searchQuery}
+                        handleSearchQuery={(e) => setSearchQuery(e)}
+                        filteredStudentsClass={filteredStudentsClass}
+                        handleSelectClass={(selectedClassroom) => handleSelectClass(selectedClassroom)}
+                    />
             }
 
             {/* Ocorrências e Fo+ */}
