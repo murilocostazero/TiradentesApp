@@ -100,6 +100,7 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
             if (response.status >= 400 && response.status <= 500) {
                 showStatusBar(response.data.message, 'error');
             } else {
+                setShowSearchClassroom(false);
                 getStudent(student._id);
             }
         } catch (error) {
