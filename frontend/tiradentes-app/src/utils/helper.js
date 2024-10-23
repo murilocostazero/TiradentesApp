@@ -38,6 +38,39 @@ export const dateToString = (isoString) => {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Janeiro é 0
     const year = date.getFullYear();
-  
+
     return `${day}/${month}/${year}`;
-  }
+}
+
+export const severityToPT = (severity) => {
+    switch (severity) {
+        case 'neutral':
+            return 'Neutra';
+            break;
+        case 'mild':
+            return 'Leve';
+            break;
+        case 'modarate':
+            return 'Moderada';
+            break;
+        case 'serious':
+            return 'Grave';
+            break;
+        case 'critical':
+            return 'Gravíssima';
+            break;
+    }
+}
+
+export const typeToPT = (type) => {
+    switch (type) {
+        case 'behavior':
+            return 'Comportamento';
+            break;
+        case 'health':
+            return 'Saúde';
+            break;
+        default:
+            return 'Outro';
+    }
+}

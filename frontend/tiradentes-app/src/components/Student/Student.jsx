@@ -229,7 +229,8 @@ const Student = ({ userInfo }) => {
         student={selectedStudent}
         classrooms={classrooms}
         selectedStudentsClass={selectedStudentsClass}
-        getStudent={(studentId) => getStudent(studentId)} /> :
+        getStudent={(studentId) => getStudent(studentId)}
+        userInfo={userInfo} /> :
       <div className="relative w-full h-full">
         {/* ----------------------------------MODAL--------------------------------- */}
         {showModal && (

@@ -7,8 +7,9 @@ import axiosInstance from '../../utils/axiosIntance';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import InputMask from 'react-input-mask';
 import SelectClassroom from '../SelectClassroom/SelectClassroom';
+import IncidentList from '../IncidentList/IncidentList';
 
-const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudentsClass, getStudent }) => {
+const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudentsClass, getStudent, userInfo }) => {
 
     const [fullName, setFullName] = useState(student.fullName);
     const [contact, setContact] = useState(student.contact);
@@ -19,7 +20,6 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
     const [behavior, setBehavior] = useState(student.behavior);
     const [address, setAddress] = useState(student.address);
     const [gender, setGender] = useState(student.gender);
-    const [occurrences, setOccurrences] = useState(student.occurrences || []);
     const [positiveFacts, setPositiveFacts] = useState(student.positiveFacts || []);
 
     const [statusBar, setStatusBar] = useState({ message: '', type: '', isVisible: false });
@@ -288,40 +288,8 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
                     />
             }
 
-            {/* Ocorrências e Fo+ */}
-            <div className="mt-6 bg-white p-4 rounded-md shadow-md">
-                <h2 className="text-lg font-semibold mb-4">Ocorrências e Fo+</h2>
+            <IncidentList student={student} userInfo={userInfo} />
 
-                {occurrences.length > 0 || positiveFacts.length > 0 ? (
-                    <div className="space-y-4">
-                        {/* Ocorrências */}
-                        <div>
-                            <h3 className="font-medium text-gray-700">Ocorrências</h3>
-                            <ul className="list-disc ml-5">
-                                {occurrences.map((occurrence, index) => (
-                                    <li key={index} className="text-gray-600">
-                                        {occurrence}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {/* Fatos Positivos */}
-                        <div>
-                            <h3 className="font-medium text-gray-700">Fo+</h3>
-                            <ul className="list-disc ml-5">
-                                {positiveFacts.map((fact, index) => (
-                                    <li key={index} className="text-gray-600">
-                                        {fact}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                ) : (
-                    <p className="text-gray-500">Nenhuma ocorrência ou fato positivo registrado.</p>
-                )}
-            </div>
             <StatusBar
                 message={statusBar.message}
                 type={statusBar.type}
