@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '../../utils/axiosIntance';
-import { stringToDate } from '../../utils/helper';
+import { dateToString, stringToDate } from '../../utils/helper';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import InputMask from 'react-input-mask';
+import SwitchSelector from "react-switch-selector";
 
 export default function AddEditIncident({
     onClose,
     onSave,
     editMode,
     student,
-    initialData = {},
-    userInfo
+    userInfo,
+    incident
 }) {
     // States para os inputs da ocorrência
     const [title, setTitle] = useState('');
@@ -19,17 +20,18 @@ export default function AddEditIncident({
     const [severity, setSeverity] = useState('moderate'); // leve, moderada, grave, gravíssima
     const [date, setDate] = useState('');
     const [isLoading, setLoading] = useState(false);
+    const [isResolved, setIsResolved] = useState(false);
+    const [resolution, setResolution] = useState('');
 
-    // Carrega os dados iniciais se estiver em modo de edição
     useEffect(() => {
-        if (editMode && initialData) {
-            setTitle(initialData.title || '');
-            setDescription(initialData.description || '');
-            setType(initialData.type || 'behavior');
-            setSeverity(initialData.severity || 'moderate');
-            setDate(initialData.date ? new Date(initialData.date).toISOString().slice(0, 10) : '');
+        if (incident) {
+            setTitle(incident.title);
+            setDescription(incident.description);
+            setType(incident.type);
+            setSeverity(incident.severity);
+            setDate(dateToString(incident.date));
         }
-    }, [editMode, initialData]);
+    }, []);
 
     // Função para limpar os campos e fechar a modal
     const handleCancel = () => {
@@ -53,7 +55,11 @@ export default function AddEditIncident({
                 severity: severity,
                 type: type,
                 date: stringToDate(date),
-                createdBy: userInfo._id
+                createdBy: userInfo._id,
+                resolved: isResolved,
+                resolution: resolution
+            }, {
+                timeout: 10000
             });
 
             if (response.status >= 400 && response.status >= 500) {
@@ -73,9 +79,49 @@ export default function AddEditIncident({
         handleCancel();
     }
 
+    const handleResolved = () => {
+        setIsResolved(!isResolved)
+    }
+
+    const handleRemove = async () => {
+        try {
+            const response = await axiosInstance.delete(`/incident/${incident._id}`, {
+                timeout: 10000
+            });
+
+            if (response.status >= 400 && response.status <= 500) {
+                showStatusBar(response.data.message, 'error');
+            } else {
+                onClose();
+            }
+        } catch (error) {
+            console.log(error)
+            if (error.code == 'ERR_NETWORK') {
+                showStatusBar('Verifique sua conexão com a internet', 'error');
+            } else {
+                showStatusBar('Um erro inesperado aconteceu. Tente novamente.', 'error');
+            }
+        }
+    }
+
+    const switchOptions = [
+        {
+            label: <span className='text-white'>Não resolvido</span>,
+            value: false,
+            selectedBackgroundColor: "#cf2d3b",
+        },
+        {
+            label: <span className='text-white'>Resolvido</span>,
+            value: true,
+            selectedBackgroundColor: "#1a7a33"
+        }
+    ]
+
+    const initialSelectedIndex = switchOptions.findIndex(({ value }) => value === false);
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
+            <div className="bg-white rounded-lg p-6 w-[40%] shadow-lg h-[80vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">
                     {editMode ? 'Editar Ocorrência' : 'Nova Ocorrência'}
                 </h2>
@@ -131,14 +177,37 @@ export default function AddEditIncident({
                 </label>
 
                 {/* Input para data */}
-                <InputMask
-                    mask="99/99/9999"
-                    value={date}
-                    onChange={(e) => {
-                        setDate(e.target.value);
-                    }}
-                    placeholder="DD/MM/AAAA"
-                    className="border p-2 w-full mb-4 rounded-md"
+                <label>
+                    Data
+                    <InputMask
+                        mask="99/99/9999"
+                        value={date}
+                        onChange={(e) => {
+                            setDate(e.target.value);
+                        }}
+                        placeholder="DD/MM/AAAA"
+                        className="border p-2 w-full mb-4 rounded-md"
+                    />
+                </label>
+
+                <div className='mb-4'>
+                    <label>Status</label>
+                    <SwitchSelector
+                        onChange={() => handleResolved}
+                        options={switchOptions}
+                        initialSelectedIndex={initialSelectedIndex}
+                        backgroundColor={"#353b48"}
+                        fontColor={"#f5f6fa"}
+                        className=''
+                    />
+                </div>
+
+                <textarea
+                    value={resolution}
+                    onChange={(e) => setResolution(e.target.value)}
+                    placeholder="Resolução"
+                    rows={4}
+                    className="w-full mb-3 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
 
                 {/* Botões de ação */}
@@ -151,8 +220,18 @@ export default function AddEditIncident({
                                     onClick={handleCancel}
                                     className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
                                 >
-                                    Cancelar
+                                    Fechar
                                 </button>
+                                {
+                                    !editMode ?
+                                        <div /> :
+                                        <button
+                                            onClick={handleRemove}
+                                            className="px-4 py-2 bg-gray-300 hover:bg-red-500 hover:text-white rounded"
+                                        >
+                                            Deletar
+                                        </button>
+                                }
                                 <button
                                     onClick={editMode ? handleEdit : handleSave}
                                     className="px-4 py-2 bg-green-500 text-white hover:bg-green-600 rounded"

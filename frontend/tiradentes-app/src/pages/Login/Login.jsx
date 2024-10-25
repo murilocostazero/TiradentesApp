@@ -6,6 +6,7 @@ import { validateEmail } from '../../utils/helper'
 import DevelopedBy from '../../components/DevelopedBy/DevelopedBy'
 import axiosInstance from '../../utils/axiosIntance'
 import StatusBar from '../../components/StatusBar/StatusBar'
+import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner'
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ const Login = () => {
         type: '',
         isVisible: false,
     });
+    const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -22,37 +24,43 @@ const Login = () => {
         e.preventDefault();
 
         if (!validateEmail(email)) {
-            showStatusBar('Insira um email válido','error');
+            showStatusBar('Insira um email válido', 'error');
             return;
         }
 
         if (!password) {
-            showStatusBar('Senha inválida','error');
+            showStatusBar('Senha inválida', 'error');
             return;
         }
 
-
+        setIsLoading(true);
         //Login API call
         try {
             const response = await axiosInstance.post('/login', {
                 email: email,
                 password: password
+            }, {
+                timeout: 10000, // 10 segundos
             });
 
             if (response.data && response.data.accessToken) {
                 localStorage.setItem('token', response.data.accessToken);
                 navigate('/dashboard');
             } else if (response.data && response.data.error) {
-                showStatusBar(response.data.message,'error');
+                showStatusBar(response.data.message, 'error');
             }
         } catch (error) {
             console.log(error)
-            if (error.response.data.message) {
-                showStatusBar(error.response.data.message,'error');
+            if(error.code == 'ERR_NETWORK'){
+                showStatusBar('Verifique sua conexão com a internet', 'error');
+            }
+            else if (error.response.data.message) {
+                showStatusBar(error.response.data.message, 'error');
             } else {
-                showStatusBar('Um erro inesperado aconteceu. Tente novamente.','error');
+                showStatusBar('Um erro inesperado aconteceu. Tente novamente.', 'error');
             }
         }
+        setIsLoading(false);
     }
 
     const showStatusBar = (message, type) => {
@@ -89,7 +97,11 @@ const Login = () => {
 
                         <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
 
-                        <button type='submit' className='btn-primary'>Login</button>
+                        {
+                            isLoading ?
+                            <LoadingSpinner /> : 
+                            <button type='submit' className='btn-primary'>Login</button>
+                        }
 
                         <p className='text-sm text-center mt-4'>
                             Ainda não tem cadastro?{" "}

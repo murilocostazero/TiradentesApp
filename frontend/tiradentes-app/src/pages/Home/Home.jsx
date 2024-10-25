@@ -77,7 +77,7 @@ const Home = () => {
           <NoDataLoaded /> :
           <div className="flex h-screen">
             {/* Menu Lateral */}
-            <div className="w-1/6 bg-gray-100 p-4">
+            <div className="w-1/6 h-full bg-gray-100 p-4">
               <ul>
                 <li
                   className={`cursor-pointer p-2 ${selectedOption === 'School' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}

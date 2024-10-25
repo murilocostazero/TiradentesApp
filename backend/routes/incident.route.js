@@ -30,7 +30,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // 3. Rota que cria uma ocorrência (POST)
 router.post('/', authenticateToken, async (req, res) => {
-    const { title, description, student, severity, type, date, createdBy } = req.body;
+    const { title, description, student, severity, type, date, createdBy, resolved, resolution } = req.body;
   
     // Verificar campos obrigatórios
     if (!title || !description || !student || !type) {
@@ -53,7 +53,7 @@ router.post('/', authenticateToken, async (req, res) => {
   
   // 4. Rota que altera uma ocorrência (PUT)
   router.put('/:id', authenticateToken, async (req, res) => {
-    const { title, description, student, severity, type, date } = req.body;
+    const { title, description, student, severity, type, date, resolved, resolution } = req.body;
   
     // Verificar campos obrigatórios
     if (!title || !description || !student || !type || !date) {

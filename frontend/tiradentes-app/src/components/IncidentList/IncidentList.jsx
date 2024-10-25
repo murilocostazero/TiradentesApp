@@ -8,6 +8,7 @@ const IncidentList = ({ student, userInfo }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [incidents, setIncidents] = useState([]);
+    const [selectedIncident, setSelectedIncident] = useState(null);
 
     useEffect(() => {
         getIncidents();
@@ -26,7 +27,8 @@ const IncidentList = ({ student, userInfo }) => {
         }
     }
 
-    const handleEditIncident = () => {
+    const handleEditIncident = async (incident) => {
+        await setSelectedIncident(incident);
         setEditMode(true);
         setIsModalOpen(true);
     }
@@ -45,7 +47,8 @@ const IncidentList = ({ student, userInfo }) => {
                         onSave={() => { }}
                         editMode={editMode}
                         student={student}
-                        userInfo={userInfo} /> :
+                        userInfo={userInfo}
+                        incident={selectedIncident} /> :
                     <div />
             }
             <div className='flex items-center justify-between mb-4'>
@@ -65,7 +68,7 @@ const IncidentList = ({ student, userInfo }) => {
                             {incidents.map((incident, index) => (
                                 <div 
                                     className='mt-1 flex flex-row shadow-md p-2 rounded-md cursor-pointer hover:bg-blue-200' 
-                                    onClick={() => handleEditIncident()}>
+                                    onClick={() => handleEditIncident(incident)}>
                                     <div className={`w-2 ${incident.type == 'behavior' ? 'bg-red-400' : incident.type == 'health' ? 'bg-yellow-400' : 'bg-green-400'} rounded-md mr-2`}></div>
                                     <div className='w-full'>
                                         <h3 className="font-medium text-gray-700">{incident.title}</h3>
@@ -76,19 +79,10 @@ const IncidentList = ({ student, userInfo }) => {
                                             <div>
                                                 <button
                                                     disabled={true}
-                                                    className={`p-2 rounded-md ${incident.severity == 'neutral' ?
-                                                        'bg-blue-500' :
-                                                        incident.severity == 'mild' ?
-                                                            'bg-green-500' :
-                                                            incident.severity == 'moderate' ?
-                                                                'bg-yellow-500' :
-                                                                incident.severity == 'serious' ?
-                                                                    'bg-orange-500' :
-                                                                    'bg-red-500'
-                                                        } text-white font-semibold mr-1`}>
+                                                    className={`p-2 rounded-md bg-slate-400 text-white font-semibold mr-1`}>
                                                     {severityToPT(incident.severity)}
                                                 </button>
-                                                <button disabled={true} className='p-2 rounded-md bg-green-400 text-white font-semibold mr-1'>
+                                                <button disabled={true} className='p-2 rounded-md bg-slate-400 text-white font-semibold mr-1'>
                                                     {typeToPT(incident.type)}
                                                 </button>
                                             </div>
