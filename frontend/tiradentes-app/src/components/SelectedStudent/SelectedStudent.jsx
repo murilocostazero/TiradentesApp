@@ -8,6 +8,7 @@ import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import InputMask from 'react-input-mask';
 import SelectClassroom from '../SelectClassroom/SelectClassroom';
 import IncidentList from '../IncidentList/IncidentList';
+import PositiveObservations from '../PositiveObservations/PositiveObservations';
 
 const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudentsClass, getStudent, userInfo }) => {
 
@@ -289,6 +290,8 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
             }
 
             <IncidentList student={student} userInfo={userInfo} />
+
+            <PositiveObservations student={student} getStudent={getStudent} />
 
             <StatusBar
                 message={statusBar.message}

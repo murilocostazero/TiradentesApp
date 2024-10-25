@@ -39,7 +39,7 @@ const IncidentList = ({ student, userInfo }) => {
     }
 
     return (
-        <div className="mt-6 bg-white p-4 rounded-md shadow-md">
+        <div className="mt-6 bg-white p-4 rounded-md">
             {
                 isModalOpen ?
                     <AddEditIncident

@@ -45,10 +45,16 @@ const student = new Schema({
         required: true,
         default: 'Regular'
     },
-    positiveObservations: {
-        type: [String],
-        default: []
-    },
+    positiveObservations: [{
+        observation: {
+            type: String,
+            required: true, // Cada observação deve ser obrigatória
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now, // A data será automaticamente preenchida com a data atual
+        },
+    }],
     classroom: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Classroom'

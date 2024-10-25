@@ -137,16 +137,16 @@ router.put('/change-behavior/:id', authenticateToken, async (req, res) => {
 });
 
 // Rota 7: Adicionar um fo+ ao aluno
-router.put('/add-fo/:id', authenticateToken, async (req, res) => {
+router.put('/add-po/:id', authenticateToken, async (req, res) => {
     try {
-        const { fo } = req.body;
+        const { positiveObservation } = req.body;
         const student = await Student.findById(req.params.id);
 
         if (!student) {
             return res.status(404).json({ error: true, message: 'Aluno não encontrado' });
         }
 
-        student.foPositive.push(fo);
+        student.positiveObservations.push(positiveObservation);
         await student.save();
 
         res.json(student);
@@ -155,7 +155,30 @@ router.put('/add-fo/:id', authenticateToken, async (req, res) => {
     }
 });
 
-// Rota 8: Buscar todos os alunos de uma turma
+// Exclui uma positiveObservation por ID
+router.put('/remove-po/:studentId/:poId', async (req, res) => {
+    try {
+      const { studentId, poId } = req.params;
+  
+      // Encontrar o aluno e remover a observação pelo ID
+      const student = await Student.findByIdAndUpdate(
+        studentId,
+        { $pull: { positiveObservations: { _id: poId } } }, // Remove a observação com o _id correspondente
+        { new: true }
+      );
+  
+      if (!student) {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+  
+      res.status(200).json({ message: 'Positive observation removed successfully', student });
+    } catch (error) {
+      res.status(500).json({ message: 'Error removing positive observation', error });
+    }
+  });
+  
+
+// Rota 9: Buscar todos os alunos de uma turma
 router.get('/classroom/:classroomId', authenticateToken, async (req, res) => {
     try {
         const students = await Student.find({ classroom: req.params.classroomId }).sort({ fullName: 1 });
