@@ -74,3 +74,24 @@ export const typeToPT = (type) => {
             return 'Outro';
     }
 }
+
+export const behaviorToPT = (behavior) => {
+    'Excellent', 'Good', 'Regular', 'Bad', 'Terrible'
+
+    switch (behavior) {
+        case 'Excellent':
+            return 'Excelente';
+            break;
+        case 'Good':
+            return 'Bom';
+            break;
+        case 'Bad':
+            return 'Ruim';
+            break;
+        case 'Terrible':
+            return 'Péssimo';
+            break;
+        default:
+            return 'Regular';
+    }
+}

@@ -7,7 +7,7 @@ import { FaPeopleGroup } from "react-icons/fa6";
 import { MdOutlineEditNote } from "react-icons/md";
 import { PiStudentFill } from "react-icons/pi";
 import School from '../../components/School/School';
-import Incidents from '../../components/Incidents/Incidents';
+import Documents from '../../components/Documents/Documents';
 import Classroom from '../../components/Classroom/Classroom';
 import Student from '../../components/Student/Student';
 import NoDataLoaded from '../../components/NoDataLoaded/NoDataLoaded';
@@ -109,13 +109,13 @@ const Home = () => {
                     className={`${selectedOption === 'Student' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
                 </li>
                 <li
-                  className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'Incident' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
-                  onClick={() => handleMenuClick('Incident')}
+                  className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'Documents' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
+                  onClick={() => handleMenuClick('Documents')}
                 >
-                  Ocorrências
+                  Documentos
                   <MdOutlineEditNote
                     size={22}
-                    className={`${selectedOption === 'Incident' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
+                    className={`${selectedOption === 'Documents' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
                 </li>
                 {/* Adicione mais opções conforme necessário */}
               </ul>
@@ -136,8 +136,8 @@ const Home = () => {
                     :
                     selectedOption === 'Student' ?
                       <Student userInfo={userInfo} /> :
-                      selectedOption === 'Incident' ?
-                        <Incidents /> : <div />
+                      selectedOption === 'Documents' ?
+                        <Documents /> : <div />
               }
             </div>
           </div>

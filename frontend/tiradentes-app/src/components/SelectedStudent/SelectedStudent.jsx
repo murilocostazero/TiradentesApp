@@ -9,6 +9,7 @@ import InputMask from 'react-input-mask';
 import SelectClassroom from '../SelectClassroom/SelectClassroom';
 import IncidentList from '../IncidentList/IncidentList';
 import PositiveObservations from '../PositiveObservations/PositiveObservations';
+import StudentPdf from './StudentPdf';
 
 const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudentsClass, getStudent, userInfo }) => {
 
@@ -182,13 +183,15 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
         <div className='w-full h-full'>
             <div className="flex items-center justify-between bg-gray-100 p-4 rounded shadow-md">
                 {/* Seta de Voltar e Nome do Aluno */}
-                <div className="flex items-center">
+                <div className="w-full flex items-center justify-between">
                     <MdArrowBack
                         className="text-slate-500 hover:text-primary cursor-pointer"
                         fontSize={20}
                         onClick={() => deselectStudent()}
                     />
                     <span className="ml-4 font-bold text-lg">{student.fullName.toUpperCase()}</span>
+
+                    <StudentPdf student={student} />
                 </div>
             </div>
 
