@@ -4,6 +4,7 @@ const Student = require('../models/student.model');
 const Classroom = require('../models/classroom.model');
 const { authenticateToken } = require('../utilities');
 const multer = require('multer');
+const path = require('path');
 
 // Rota 1: Buscar 1 aluno por ID
 router.get('/:id', authenticateToken, async (req, res) => {
@@ -158,25 +159,25 @@ router.put('/add-po/:id', authenticateToken, async (req, res) => {
 // Exclui uma positiveObservation por ID
 router.put('/remove-po/:studentId/:poId', async (req, res) => {
     try {
-      const { studentId, poId } = req.params;
-  
-      // Encontrar o aluno e remover a observação pelo ID
-      const student = await Student.findByIdAndUpdate(
-        studentId,
-        { $pull: { positiveObservations: { _id: poId } } }, // Remove a observação com o _id correspondente
-        { new: true }
-      );
-  
-      if (!student) {
-        return res.status(404).json({ message: 'Student not found' });
-      }
-  
-      res.status(200).json({ message: 'Positive observation removed successfully', student });
+        const { studentId, poId } = req.params;
+
+        // Encontrar o aluno e remover a observação pelo ID
+        const student = await Student.findByIdAndUpdate(
+            studentId,
+            { $pull: { positiveObservations: { _id: poId } } }, // Remove a observação com o _id correspondente
+            { new: true }
+        );
+
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        res.status(200).json({ message: 'Positive observation removed successfully', student });
     } catch (error) {
-      res.status(500).json({ message: 'Error removing positive observation', error });
+        res.status(500).json({ message: 'Error removing positive observation', error });
     }
-  });
-  
+});
+
 
 // Rota 9: Buscar todos os alunos de uma turma
 router.get('/classroom/:classroomId', authenticateToken, async (req, res) => {
@@ -197,7 +198,7 @@ router.get('/classroom/:classroomId', authenticateToken, async (req, res) => {
 // Configurando o armazenamento de imagens
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // pasta onde a imagem será armazenada
+        cb(null, 'uploads'); // pasta onde a imagem será armazenada
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname); // nome único
@@ -208,13 +209,49 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage, limits: { fileSize: 2000000 } });
 
 // Rota para fazer upload da foto do aluno
-router.post('/upload-photo', authenticateToken, upload.single('photo'), (req, res) => {
+router.put('/:id/upload-photo', authenticateToken, upload.single('photo'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: true, message: 'Nenhuma foto foi enviada.' });
     }
 
     const photoUrl = `/uploads/${req.file.filename}`;
-    res.json({ photoUrl });
+
+    try {
+        const updatedStudent = await Student.findByIdAndUpdate(
+            req.params.id,
+            { photoUrl: photoUrl },
+            { new: true }
+        );
+
+        if (!updatedStudent) {
+            return res.status(404).json({ error: true, message: 'Aluno não encontrado' });
+        }
+
+        res.json({ photoUrl });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: true, message: 'Erro ao atualizar o aluno com a foto.' });
+    }
+});
+
+router.get('/:id/photo', authenticateToken, async (req, res) => {
+    try {
+        // Buscar o aluno pelo ID
+        const student = await Student.findById(req.params.id);
+
+        if (!student || !student.photoUrl) {
+            return res.status(404).json({ error: true, message: 'Foto não encontrada' });
+        }
+
+        // Caminho absoluto para a foto
+        const photoPath = path.join(__dirname, '..', student.photoUrl);
+
+        // Enviar a imagem como resposta
+        res.sendFile(photoPath);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: true, message: 'Erro ao buscar a foto' });
+    }
 });
 
 module.exports = router;

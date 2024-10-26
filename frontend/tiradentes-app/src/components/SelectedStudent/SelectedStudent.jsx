@@ -22,6 +22,9 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
     const [address, setAddress] = useState(student.address);
     const [gender, setGender] = useState(student.gender);
     const [positiveFacts, setPositiveFacts] = useState(student.positiveFacts || []);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [preview, setPreview] = useState(null);
+    const [hasNewPhoto, setHasNewPhoto] = useState(false);
 
     const [statusBar, setStatusBar] = useState({ message: '', type: '', isVisible: false });
     const [loadingSaveStudent, setLoadingSaveStudent] = useState(false);
@@ -30,8 +33,72 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-
+        if (student) {
+            getProfilePicture();
+        }
     }, []);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        const validTypes = ['image/jpeg', 'image/png'];
+
+        // Verifica se o arquivo é jpg ou png
+        if (!validTypes.includes(file.type)) {
+            showStatusBar('Apenas arquivos JPG ou PNG são permitidos.', 'error');
+            return;
+        }
+
+        // Verifica se o arquivo tem até 2MB
+        if (file.size > 2 * 1024 * 1024) { // 2MB em bytes
+            showStatusBar('O tamanho do arquivo deve ser de no máximo 2MB.', 'error');
+            return;
+        }
+
+        setSelectedFile(file);
+        setPreview(URL.createObjectURL(file));
+        setHasNewPhoto(true);
+    };
+
+    const handleUpload = async () => {
+        if (!selectedFile) return;
+
+        const formData = new FormData();
+        formData.append('photo', selectedFile);
+
+        try {
+            const response = await axiosInstance.put(
+                `/student/${student._id}/upload-photo`, // Rota de upload configurada no backend com multer
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
+            showStatusBar('Sucesso ao enviar foto', 'success');
+            setHasNewPhoto(false);
+            setPreview('');
+
+            getProfilePicture();
+        } catch (error) {
+            console.error('Error uploading photo:', error);
+            showStatusBar('Falha ao enviar a foto', 'error');
+        }
+    };
+
+    const getProfilePicture = async () => {
+        try {
+            const response = await axiosInstance.get(`/student/${student._id}/photo`, {
+                responseType: 'blob' // para tratar a imagem como um arquivo blob
+            });
+            const imageURL = URL.createObjectURL(response.data);
+            setSelectedFile(imageURL);
+            setPreview(imageURL)
+        } catch (error) {
+            console.error("Erro ao carregar a foto do aluno:", error);
+            showStatusBar('Erro ao carregar foto de perfil', 'error')
+        }
+    }
 
     const editStudent = async () => {
         if (!fullName || !contact || !cpf || !dateOfBirth || !guardianName || !guardianContact || !address || !gender || !behavior) {
@@ -131,24 +198,36 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
                 loadingSaveStudent ?
                     <LoadingSpinner /> :
                     <div className="flex space-x-6 mt-8 mb-8">
-                        <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-300">
-                            {/* Simula a imagem do perfil */}
-                            <img
-                                src="https://via.placeholder.com/150"
-                                alt="Foto do Aluno"
-                                className="w-full h-full object-cover"
+                        <div className="relative w-32 h-32">
+                            <label className="cursor-pointer" htmlFor="photo-upload">
+                                <div className="w-full h-full rounded-full overflow-hidden bg-gray-300 border border-gray-400 flex items-center justify-center">
+                                    {preview ? (
+                                        <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-gray-500">No Photo</span>
+                                    )}
+                                </div>
+                                <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 rounded-full p-1">
+                                    <FaCamera className="text-white text-sm" />
+                                </div>
+                            </label>
+
+                            <input
+                                type="file"
+                                id="photo-upload"
+                                onChange={handleFileChange}
+                                className="hidden"
                             />
-
-                            {/* Gradiente na parte inferior */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-75"></div>
-
-                            {/* Botão de câmera */}
-                            <button
-                                className="absolute bottom-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition"
-                                onClick={() => alert('Trocar foto')}
-                            >
-                                <FaCamera className="text-black text-lg" />
-                            </button>
+                            {
+                                selectedFile && hasNewPhoto ?
+                                    <button
+                                        onClick={handleUpload}
+                                        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+                                    >
+                                        Fazer upload
+                                    </button> :
+                                    <div />
+                            }
                         </div>
 
                         {/* Informações Pessoais (Inputs Editáveis) */}
