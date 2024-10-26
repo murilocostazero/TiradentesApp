@@ -33,7 +33,7 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        if (student) {
+        if (student.photoUrl) {
             getProfilePicture();
         }
     }, []);

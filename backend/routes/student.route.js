@@ -5,6 +5,7 @@ const Classroom = require('../models/classroom.model');
 const { authenticateToken } = require('../utilities');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 // Rota 1: Buscar 1 aluno por ID
 router.get('/:id', authenticateToken, async (req, res) => {
@@ -217,15 +218,27 @@ router.put('/:id/upload-photo', authenticateToken, upload.single('photo'), async
     const photoUrl = `/uploads/${req.file.filename}`;
 
     try {
-        const updatedStudent = await Student.findByIdAndUpdate(
-            req.params.id,
-            { photoUrl: photoUrl },
-            { new: true }
-        );
-
-        if (!updatedStudent) {
+        // Encontre o aluno pelo ID
+        const student = await Student.findById(req.params.id);
+        if (!student) {
             return res.status(404).json({ error: true, message: 'Aluno não encontrado' });
         }
+
+        // Se o aluno já tiver uma foto, exclua-a
+        if (student.photoUrl) {
+            const oldPhotoPath = path.join(__dirname, '..', 'uploads', student.photoUrl.split('/').pop());
+            fs.unlink(oldPhotoPath, (err) => {
+                if (err) {
+                    console.error("Erro ao excluir a foto anterior:", err);
+                }
+            });
+        }
+
+
+        // Atualiza a URL da nova foto no banco de dados
+        const photoUrl = `/uploads/${req.file.filename}`;
+        student.photoUrl = photoUrl;
+        await student.save();
 
         res.json({ photoUrl });
     } catch (error) {
