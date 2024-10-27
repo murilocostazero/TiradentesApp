@@ -91,6 +91,8 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
         try {
             const response = await axiosInstance.get(`/student/${student._id}/photo`, {
                 responseType: 'blob' // para tratar a imagem como um arquivo blob
+            }, {
+                timeout: 10000
             });
             const imageURL = URL.createObjectURL(response.data);
             setSelectedFile(imageURL);

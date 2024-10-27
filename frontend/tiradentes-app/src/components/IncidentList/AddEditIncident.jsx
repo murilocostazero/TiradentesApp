@@ -3,7 +3,6 @@ import axiosInstance from '../../utils/axiosIntance';
 import { dateToString, stringToDate } from '../../utils/helper';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import InputMask from 'react-input-mask';
-import SwitchSelector from "react-switch-selector";
 
 export default function AddEditIncident({
     onClose,
@@ -24,12 +23,15 @@ export default function AddEditIncident({
     const [resolution, setResolution] = useState('');
 
     useEffect(() => {
+        console.log(incident)
         if (incident) {
             setTitle(incident.title);
             setDescription(incident.description);
             setType(incident.type);
             setSeverity(incident.severity);
             setDate(dateToString(incident.date));
+            setIsResolved(incident.resolved);
+            setResolution(incident.resolution);
         }
     }, []);
 
@@ -42,6 +44,22 @@ export default function AddEditIncident({
         setDate('');
         onClose(); // Fecha a modal
     };
+
+    const verifyEmptyFields = () => {
+        if (!editMode) {
+            if (!title || !description || !type || !severity || !date) {
+                showStatusBar('Todos os campos são obrigatórios', 'error');
+            } else {
+                handleSave();
+            }
+        } else {
+            if (!title || !description || !type || !severity || !date || !resolution) {
+                showStatusBar('Todos os campos são obrigatórios', 'error');
+            } else {
+                handleEdit();
+            }
+        }
+    }
 
     // Função chamada ao clicar em "Salvar Alterações"
     const handleSave = async () => {
@@ -74,9 +92,32 @@ export default function AddEditIncident({
     }
 
     const handleEdit = async () => {
-        const incidentData = { title, description, type, severity, date };
+        setLoading(true);
+        //API call
+        try {
+            const response = await axiosInstance.put(`/incident/${incident._id}`, {
+                title: title,
+                description: description,
+                student: student._id,
+                severity: severity,
+                type: type,
+                date: stringToDate(date),
+                createdBy: userInfo._id,
+                resolved: isResolved,
+                resolution: resolution
+            }, {
+                timeout: 10000
+            });
 
-        handleCancel();
+            if (response.status >= 400 && response.status >= 500) {
+                showStatusBar(response.data.message, 'error');
+            } else {
+                handleCancel();
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setLoading(false);
     }
 
     const handleResolved = () => {
@@ -192,14 +233,14 @@ export default function AddEditIncident({
 
                 <div className='mb-4'>
                     <label>Status</label>
-                    <SwitchSelector
-                        onChange={() => handleResolved}
-                        options={switchOptions}
-                        initialSelectedIndex={initialSelectedIndex}
-                        backgroundColor={"#353b48"}
-                        fontColor={"#f5f6fa"}
-                        className=''
-                    />
+                    <select
+                        value={isResolved}
+                        onChange={(e) => setIsResolved(e.target.value)}
+                        className="w-full mb-3 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                        <option value={true}>Resolvido</option>
+                        <option value={false}>Não resolvido</option>
+                    </select>
                 </div>
 
                 <textarea
@@ -233,7 +274,7 @@ export default function AddEditIncident({
                                         </button>
                                 }
                                 <button
-                                    onClick={editMode ? handleEdit : handleSave}
+                                    onClick={verifyEmptyFields}
                                     className="px-4 py-2 bg-green-500 text-white hover:bg-green-600 rounded"
                                 >
                                     {editMode ? 'Salvar Alterações' : 'Adicionar'}

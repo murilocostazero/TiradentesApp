@@ -247,8 +247,15 @@ router.put('/:id/upload-photo', authenticateToken, upload.single('photo'), async
     }
 });
 
-router.get('/:id/photo', authenticateToken, async (req, res) => {
+router.get('/:id/photo', authenticateToken, async (req, res, next) => {
     try {
+        // Define o timeout de 10 segundos
+        req.setTimeout(10000, () => {
+            const err = new Error('Tempo limite da requisição excedido');
+            err.status = 503;
+            next(err);
+        });
+
         // Buscar o aluno pelo ID
         const student = await Student.findById(req.params.id);
 

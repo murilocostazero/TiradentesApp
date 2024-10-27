@@ -56,7 +56,7 @@ router.post('/', authenticateToken, async (req, res) => {
     const { title, description, student, severity, type, date, resolved, resolution } = req.body;
   
     // Verificar campos obrigatórios
-    if (!title || !description || !student || !type || !date) {
+    if (!title || !description || !student || !type || !date || !resolution) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
   

@@ -34,7 +34,8 @@ const AddEditPositiveObservation = ({ onClose, onAdd, isLoading }) => {
                                 </button>
 
                                 <button
-                                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                                    disabled={observation ? false : true}
+                                    className={`text-white font-bold py-2 px-4 rounded ${observation ? 'bg-green-500 hover:bg-green-600 cursor-pointer' : 'bg-slate-500 hover:cursor-not-allowed'}`}
                                     onClick={() => onAdd(observation)}>
                                     Salvar
                                 </button>
