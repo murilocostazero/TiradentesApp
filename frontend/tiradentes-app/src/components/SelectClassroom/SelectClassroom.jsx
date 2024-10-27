@@ -13,6 +13,22 @@ const SelectClassroom = ({
     return (
         <>
             <div className='justify-between flex flex-row'>
+
+                <div className='flex items-center'>
+                    <button
+                        onClick={() => openSearchClass()}
+                        className={`border-2 mr-4 border-red-500 bg-gray-800 text-red-500 font-bold rounded-md px-4 py-2 hover:bg-gray-700`}>
+                        {
+                            !showSearchClassroom ? 'Mudar de turma' : 'Cancelar'
+                        }
+                    </button>
+                    {
+                        selectedStudentsClass ?
+                            <span className='font-bold mr-2'>Selecionado: {selectedStudentsClass.grade}º ano {selectedStudentsClass.className}</span> :
+                            <span>Nenhuma turma selecionada</span>
+                    }
+                </div>
+
                 {
                     !showSearchClassroom ?
                         <div /> :
@@ -22,23 +38,9 @@ const SelectClassroom = ({
                                 value={searchQuery}
                                 onChange={(e) => handleSearchQuery(e.target.value)}
                                 className='w-full focus:outline-none bg-transparent' />
-                            <IoMdClose className='text-xl text-slate-500 cursor-pointer hover:text-black mr-3' onClick={() => setSearchQuery('')} />
+                            <IoMdClose className='text-xl text-slate-500 cursor-pointer hover:text-black mr-3' onClick={() => handleSearchQuery('')} />
                         </div>
                 }
-                <div className='flex items-center'>
-                    {
-                        selectedStudentsClass ?
-                            <span className='font-bold mr-2'>Selecionado: {selectedStudentsClass.grade}º ano {selectedStudentsClass.className}</span> :
-                            <span>Nenhuma turma selecionada</span>
-                    }
-                    <button
-                        onClick={() => openSearchClass()}
-                        className={`text-white p-2 rounded-md shadow-lg ${!showSearchClassroom ? 'bg-primary' : 'bg-red-600'}`}>
-                        {
-                            !showSearchClassroom ? 'Mudar de turma' : 'Cancelar'
-                        }
-                    </button>
-                </div>
             </div>
 
             {

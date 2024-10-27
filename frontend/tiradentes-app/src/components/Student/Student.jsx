@@ -155,7 +155,7 @@ const Student = ({ userInfo, selectedStudentSearch }) => {
           showStatusBar(response.data.message, 'error');
         } else {
           showStatusBar('Aluno cadastrado com sucesso', 'success');
-          getStudents();
+          getStudents(selectedStudentsClass);
         }
       } catch (error) {
         if (error.code === 'ECONNABORTED') {

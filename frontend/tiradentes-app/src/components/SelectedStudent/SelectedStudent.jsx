@@ -10,6 +10,7 @@ import SelectClassroom from '../SelectClassroom/SelectClassroom';
 import IncidentList from '../IncidentList/IncidentList';
 import PositiveObservations from '../PositiveObservations/PositiveObservations';
 import StudentPdf from './StudentPdf';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 
 const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudentsClass, getStudent, userInfo }) => {
 
@@ -33,6 +34,8 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
     const [loadingGetPhoto, setLoadingGetPhoto] = useState(false);
     const [showSearchClassroom, setShowSearchClassroom] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [loadingDeleteStudent, setLoadingDeleteStudent] = useState(false);
 
     useEffect(() => {
         if (student.photoUrl) {
@@ -156,6 +159,7 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
 
     const openSearchClass = () => {
         setShowSearchClassroom(!showSearchClassroom)
+        if (!showSearchClassroom) setSearchQuery('');
     }
 
     const filteredStudentsClass = classrooms.filter((classroom) =>
@@ -182,6 +186,29 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
             showStatusBar('Houve um problema ao atualizar os dados do aluno. Tente novamente.', 'error');
         }
         setLoadingChangeClass(false);
+    }
+
+    const handleDeleteClick = () => {
+        setModalOpen(true);
+    };
+
+    const onDelete = async (studentId) => {
+        setLoadingDeleteStudent(true);
+            try {
+                const response = await axiosInstance.delete(`/student/${student._id}`, {
+                    timeout: 10000, // 10 segundos
+                });
+
+                if (response.status >= 400 && response.status <= 500) {
+                    showStatusBar(response.data.message, 'error');
+                } else {
+                    deselectStudent();
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar os dados do aluno:', error);
+                showStatusBar('Houve um problema ao atualizar os dados do aluno. Tente novamente.', 'error');
+            }
+            setLoadingDeleteStudent(false);
     }
 
     return (
@@ -365,21 +392,6 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
                     </div>
             }
 
-            {/* Trocar de turma */}
-            {
-                loadingChangeClass ?
-                    <LoadingSpinner /> :
-                    <SelectClassroom
-                        selectedStudentsClass={selectedStudentsClass}
-                        openSearchClass={() => openSearchClass()}
-                        showSearchClassroom={showSearchClassroom}
-                        searchQuery={searchQuery}
-                        handleSearchQuery={(e) => setSearchQuery(e)}
-                        filteredStudentsClass={filteredStudentsClass}
-                        handleSelectClass={(selectedClassroom) => handleSelectClass(selectedClassroom)}
-                    />
-            }
-
             <IncidentList student={student} userInfo={userInfo} />
 
             <PositiveObservations student={student} getStudent={getStudent} />
@@ -390,6 +402,39 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
                 isVisible={statusBar.isVisible}
                 onClose={hideStatusBar}
             />
+
+            <div className='p-4'>
+                <p className='font-semibold text-lg mb-4'>Zona de perigo</p>
+                {/* Trocar de turma */}
+                {
+                    loadingChangeClass ?
+                        <LoadingSpinner /> :
+                        <SelectClassroom
+                            selectedStudentsClass={selectedStudentsClass}
+                            openSearchClass={() => openSearchClass()}
+                            showSearchClassroom={showSearchClassroom}
+                            searchQuery={searchQuery}
+                            handleSearchQuery={(e) => setSearchQuery(e)}
+                            filteredStudentsClass={filteredStudentsClass}
+                            handleSelectClass={(selectedClassroom) => handleSelectClass(selectedClassroom)}
+                        />
+                }
+                <div className='w-full mt-4 flex justify-center items-center border-t-2 border-red-400 p-4'>
+                    <button
+                        onClick={handleDeleteClick}
+                        className={`border-2 border-red-500 bg-gray-800 text-red-500 font-bold rounded-md px-4 py-2 hover:bg-gray-700`}>
+                        EXCLUIR ALUNO
+                    </button>
+
+                    {/* Modal de confirmação */}
+                    <ConfirmDeleteModal
+                        isOpen={isModalOpen}
+                        onClose={() => setModalOpen(false)}
+                        onDelete={() => onDelete(student._id)} // Chame a função de exclusão
+                        studentName={student.fullName} // Passe o nome do aluno para a modal
+                    />
+                </div>
+            </div>
         </div>
     )
 }
