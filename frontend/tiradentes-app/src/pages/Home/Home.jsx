@@ -7,7 +7,7 @@ import { FaPeopleGroup } from "react-icons/fa6";
 import { MdOutlineEditNote } from "react-icons/md";
 import { PiStudentFill } from "react-icons/pi";
 import School from '../../components/School/School';
-import Documents from '../../components/Documents/Documents';
+// import Documents from '../../components/Documents/Documents';
 import Classroom from '../../components/Classroom/Classroom';
 import Student from '../../components/Student/Student';
 import NoDataLoaded from '../../components/NoDataLoaded/NoDataLoaded';
@@ -16,6 +16,7 @@ const Home = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [selectedOption, setSelectedOption] = useState('School');
   const [selectedSchool, setSelectedSchool] = useState(null);
+  const [selectedStudentSearch, setSelectedStudentSearch] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -32,6 +33,11 @@ const Home = () => {
         navigate('/login');
       }
     }
+  }
+
+  const selectedNavbarStudent = async (student) => {
+    await setSelectedStudentSearch(student);
+    handleMenuClick('Student');
   }
 
   useEffect(() => {
@@ -71,7 +77,7 @@ const Home = () => {
 
   return (
     <>
-      <Navbar userInfo={userInfo} />
+      <Navbar userInfo={userInfo} selectedNavbarStudent={selectedNavbarStudent} />
       {
         !userInfo ?
           <NoDataLoaded /> :
@@ -108,15 +114,7 @@ const Home = () => {
                     size={22}
                     className={`${selectedOption === 'Student' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
                 </li>
-                <li
-                  className={`cursor-pointer p-2 flex justify-between items-center ${selectedOption === 'Documents' ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
-                  onClick={() => handleMenuClick('Documents')}
-                >
-                  Documentos
-                  <MdOutlineEditNote
-                    size={22}
-                    className={`${selectedOption === 'Documents' ? 'text-slate-50' : 'text-primary opacity-50'}`} />
-                </li>
+                
                 {/* Adicione mais opções conforme necessário */}
               </ul>
             </div>
@@ -135,9 +133,7 @@ const Home = () => {
                     <Classroom userInfo={userInfo} />
                     :
                     selectedOption === 'Student' ?
-                      <Student userInfo={userInfo} /> :
-                      selectedOption === 'Documents' ?
-                        <Documents /> : <div />
+                      <Student userInfo={userInfo} selectedStudentSearch={selectedStudentSearch} /> : <div />
               }
             </div>
           </div>

@@ -1,11 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import logo from '../../assets/images/logo-cmt.png';
 import ProfileInfo from '../Cards/ProfileInfo';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../SearchBar/SearchBar';
+import axiosInstance from '../../utils/axiosIntance';
 
-const Navbar = ({ userInfo }) => {
+const Navbar = ({ userInfo, selectedNavbarStudent }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+
+  useEffect(() => {
+    getStudents();
+  }, []);
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    if (query.length > 0) {
+      setShowDropdown(true);  // Mostra o dropdown quando o usuário digita
+      const filtered = students.filter((student) =>
+        student.fullName.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredStudents(filtered);
+    } else {
+      setShowDropdown(false); // Oculta o dropdown se a barra de pesquisa estiver vazia
+      setFilteredStudents([]);
+    }
+  };
+
+  const getStudents = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(`/student/students`);
+      setStudents(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+    setLoading(false);
+  }
 
   const navigate = useNavigate();
 
@@ -14,12 +50,10 @@ const Navbar = ({ userInfo }) => {
     navigate('/login');
   }
 
-  const handleSearch = () => {
-
-  }
-
   const onClearSearch = () => {
     setSearchQuery('');
+    setShowDropdown(false);
+    setFilteredStudents([]);
   }
 
   return (
@@ -30,15 +64,19 @@ const Navbar = ({ userInfo }) => {
         !userInfo ?
           <img src={logo} alt="Logo do CMT" className='h-12 w-26' />
           :
-          <>
-            <SearchBar
-              value={searchQuery}
-              onChange={({ target }) => {
-                setSearchQuery(target.value)
-              }}
-              handleSearch={handleSearch}
-              onClearSearch={onClearSearch}
-            />
+          <>  
+            {
+              // loading ?
+              //   <span>Carregando alunos...</span> :
+              //   <SearchBar
+              //     searchQuery={searchQuery}
+              //     handleSearchChange={(e) => handleSearchChange(e)}
+              //     onClearSearch={onClearSearch}
+              //     filteredStudents={filteredStudents}
+              //     showDropdown={showDropdown}
+              //     selectedNavbarStudent={selectedNavbarStudent}
+              //   />
+            }
             <ProfileInfo userInfo={userInfo} onLogout={onLogout} />
           </>
       }

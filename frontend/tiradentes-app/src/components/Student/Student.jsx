@@ -9,7 +9,7 @@ import { dateToString, firstAndLastName, stringToDate } from '../../utils/helper
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import SelectedStudent from '../SelectedStudent/SelectedStudent';
 
-const Student = ({ userInfo }) => {
+const Student = ({ userInfo, selectedStudentSearch }) => {
 
   const [showModal, setShowModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState(false);
@@ -41,6 +41,11 @@ const Student = ({ userInfo }) => {
 
   useEffect(() => {
     getClassrooms();
+
+    if(selectedStudentSearch){
+      console.log(selectedStudentSearch)
+      getStudent(selectedStudentSearch._id);
+    }
   }, []);
 
   const getStudent = async (studentId) => {
@@ -223,7 +228,7 @@ const Student = ({ userInfo }) => {
   }
 
   return (
-    selectedStudent ?
+    selectedStudent && selectedStudentsClass ?
       <SelectedStudent
         deselectStudent={() => handleDeselectStudent()}
         student={selectedStudent}

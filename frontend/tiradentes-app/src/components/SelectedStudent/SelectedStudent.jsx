@@ -30,6 +30,7 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
     const [statusBar, setStatusBar] = useState({ message: '', type: '', isVisible: false });
     const [loadingSaveStudent, setLoadingSaveStudent] = useState(false);
     const [loadingChangeClass, setLoadingChangeClass] = useState(false);
+    const [loadingGetPhoto, setLoadingGetPhoto] = useState(false);
     const [showSearchClassroom, setShowSearchClassroom] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -88,6 +89,7 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
     };
 
     const getProfilePicture = async () => {
+        setLoadingGetPhoto(true);
         try {
             const response = await axiosInstance.get(`/student/${student._id}/photo`, {
                 responseType: 'blob' // para tratar a imagem como um arquivo blob
@@ -101,6 +103,7 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
             console.error("Erro ao carregar a foto do aluno:", error);
             showStatusBar('Erro ao carregar foto de perfil', 'error')
         }
+        setLoadingGetPhoto(false);
     }
 
     const editStudent = async () => {
@@ -206,11 +209,15 @@ const SelectedStudent = ({ deselectStudent, student, classrooms, selectedStudent
                         <div className="relative w-32 h-32">
                             <label className="cursor-pointer" htmlFor="photo-upload">
                                 <div className="w-full h-full rounded-full overflow-hidden bg-gray-300 border border-gray-400 flex items-center justify-center">
-                                    {preview ? (
-                                        <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="text-gray-500">No Photo</span>
-                                    )}
+                                    {
+                                        loadingGetPhoto ?
+                                            <LoadingSpinner /> :
+                                            preview ?
+                                                <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                                                :
+                                                <span className="text-gray-500">No Photo</span>
+
+                                    }
                                 </div>
                                 <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 rounded-full p-1">
                                     <FaCamera className="text-white text-sm" />

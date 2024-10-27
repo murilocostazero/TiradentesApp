@@ -99,6 +99,7 @@ const PositiveObservations = ({ student, getStudent }) => {
                             {/* Ocorrências */}
                             {positiveObservations.map((observation, index) => (
                                 <div
+                                    key={observation._id}
                                     className='mt-1 flex flex-row justify-between items-center shadow-md p-2 rounded-md cursor-default hover:bg-blue-200'>
                                     <label>{`${observation.observation} no dia ${dateToString(observation.createdAt)}`}</label>
                                     {

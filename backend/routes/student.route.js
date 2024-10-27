@@ -7,6 +7,22 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+// Rota para buscar todos os alunos em ordem alfabética
+router.get('/students', authenticateToken, async (req, res) => {
+    try {
+        // Definindo timeout maior para a requisição (ex: 30 segundos)
+        req.setTimeout(30000);
+
+        // Buscando alunos no banco de dados, ordenando por nome
+        const students = await Student.find().sort({ fullName: 1 });
+
+        res.json(students);
+    } catch (error) {
+        console.error("Erro ao buscar alunos:", error);
+        res.status(500).json({ message: 'Erro ao buscar alunos' });
+    }
+});
+
 // Rota 1: Buscar 1 aluno por ID
 router.get('/:id', authenticateToken, async (req, res) => {
     try {
@@ -265,7 +281,7 @@ router.get('/:id/photo', authenticateToken, async (req, res, next) => {
 
         // Caminho absoluto para a foto
         const photoPath = path.join(__dirname, '..', student.photoUrl);
-
+        
         // Enviar a imagem como resposta
         res.sendFile(photoPath);
     } catch (error) {

@@ -67,6 +67,7 @@ const IncidentList = ({ student, userInfo }) => {
                             {/* Ocorrências */}
                             {incidents.map((incident, index) => (
                                 <div 
+                                    key={incident._id}
                                     className='mt-1 flex flex-row shadow-md p-2 rounded-md cursor-pointer hover:bg-blue-200' 
                                     onClick={() => handleEditIncident(incident)}>
                                     <div className={`w-2 ${incident.type == 'behavior' ? 'bg-red-400' : incident.type == 'health' ? 'bg-yellow-400' : 'bg-green-400'} rounded-md mr-2`}></div>
