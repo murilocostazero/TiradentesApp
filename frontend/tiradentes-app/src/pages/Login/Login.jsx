@@ -45,7 +45,7 @@ const Login = () => {
 
             if (response.data && response.data.accessToken) {
                 localStorage.setItem('token', response.data.accessToken);
-                navigate('/dashboard');
+                navigate('/dashboard', { replace: true });
             } else if (response.data && response.data.error) {
                 showStatusBar(response.data.message, 'error');
             }
